@@ -15,3 +15,32 @@ Then from the root directory of the project you need to run:
 protoc protos/sor.proto --python_out=proto_genfiles
 `
 To regenerate the proto genfiles into their folder from the proto files.
+
+Running the current main.py generates some example proto vectors and matrices.
+```
+./main.py 
+vector_name: "b"
+length: 3
+values: 3
+values: 4
+values: 5
+
+matrix_name: "a"
+row_count: 3
+column_count: 3
+values {
+  value: 3.9
+}
+values {
+  row_index: 1
+  column_index: 1
+  value: 7.8
+}
+values {
+  row_index: 2
+  column_index: 2
+  value: 11.7
+}
+
+```
+
