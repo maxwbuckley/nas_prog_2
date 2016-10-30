@@ -11,7 +11,7 @@ message SparseValue {
 
 message SparseMatrix {
   string matrix_name = 1;
-  // Again, need to be stricly positive.
+  // Again, need to be strictly positive.
   uint64 row_count = 2;
   uint64 column_count = 3;
   // SparseMatrix can have any number of SparseValues.
@@ -21,6 +21,7 @@ message SparseMatrix {
 
 message Vector {
   string vector_name = 1;
+  // Client code needs to verify length and len(values) are equal.
   uint64 length = 2;
   repeated double values = 3;
 }

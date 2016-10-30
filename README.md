@@ -16,9 +16,9 @@ protoc protos/sor.proto --python_out=proto_genfiles
 `
 To regenerate the proto genfiles into their folder from the proto files.
 
-Running the current main.py generates some example proto vectors and matrices.
+Running the current proto_example.py generates some example proto vectors and matrices.
 ```
-./main.py 
+./proto_example.py 
 
 vector_name: "b"
 length: 3
