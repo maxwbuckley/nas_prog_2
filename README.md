@@ -19,6 +19,7 @@ To regenerate the proto genfiles into their folder from the proto files.
 Running the current main.py generates some example proto vectors and matrices.
 ```
 ./main.py 
+
 vector_name: "b"
 length: 3
 values: 3
