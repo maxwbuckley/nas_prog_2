@@ -2,7 +2,6 @@
 import validation
 from proto_genfiles.protos import sor_pb2
 
-#TODO Should this have a from proto method as well as other constructors.
 class Vector(object):
   def __init__(self, name=None, number_list=None,  vector_proto=None):
     """Create a new vector object from the received vector proto.
