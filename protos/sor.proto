@@ -1,0 +1,40 @@
+// sor.proto
+syntax = "proto3";
+
+message SparseValue {
+  // Need to be positive
+  uint64 row_index = 1;
+  uint64 column_index = 2;
+  // Stored value
+  double value =3;
+}
+
+message SparseMatrix {
+  string matrix_name = 1;
+  uint64 row_count = 2;
+  uint64 column_count = 3;
+  // Matrix can have any number of Values.
+  // Client code will need to check for inconcistencies. 
+  repeated SparseValue values = 4; 
+}
+
+message Vector {
+  string vector_name = 1;
+  uint64 length = 2;
+  repeated double values = 3;
+}
+
+message SorReturnValue {
+  string result_name = 1;
+  enum StoppingReason {
+    UNKNOWN = 0;
+    X_SEQUENCE_CONVERGENCE = 1;
+    RESIDUAL_CONVERGENCE = 2;
+    MAX_ITERATIONS_REACHED = 3;
+    X_SEQUENCE_DIVERGENCE =4;
+    ZERO_ON_DIAGONAL = 5;
+    UNRECOVERABLE_EXCEPTION = 6;
+  }
+  StoppingReason stoppig_reason = 3;
+  Vector vector = 4;
+}
