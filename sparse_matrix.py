@@ -1,8 +1,9 @@
 """Class and methods pertaining to Sparse Matrices."""
-import validation 
+import validation
+import vector
 
 class NonConformableException(Exception):
-  """Exception for when tries to multiply non conformable matrices."""
+  """Exception for when one tries to multiply non conformable matrices."""
   pass
 
 
@@ -12,14 +13,16 @@ class SparseMatrix(object):
     validation.ValidateSparseMatrixProto(sparse_matrix_proto)
     self.columns = sparse_matrix_proto.column_count
     self.rows = sparse_matrix_proto.row_count
-    self.rowStart, self.cols, self.vals = self.getCsrStructure(sparse_matrix_proto.values)
-  
-  def getCsrStrucutre(sparse_value_protos):
+    self.rowStart, self.cols, self.vals = self._getCsrStructure(
+      sparse_matrix_proto.values)
+
+  def _getCsrStructure(self, sparse_value_protos):
     temp_list = []
     for value in sparse_value_protos:
-      temp_list.apend((value.row_index, value.col_index, value.value))
-    sorted_list = sorted(temp_list, key=lambda: (element[0], element[1]))
-    row, col, val = sorted_list[0]
+      temp_list.append((value.row_index, value.column_index, value.value))
+    sorted_list = sorted(temp_list, key=lambda element: (element[0], element[1]))
+    # popping left is O(n). Better to replace with a queue.
+    row, col, val = sorted_list.pop(0)
     rowStart = [row]
     cols = [col]
     vals = [val]
@@ -28,7 +31,22 @@ class SparseMatrix(object):
         rowStart.append(row[0])
       cols.append(row[1])
       vals.append(row[2])
+    # Add sentinel value.
+    rowStart.append(self.rows)
     return rowStart, cols, vals
+
+  def __repr__(self):
+    return '\n'.join([str(row) for row in self.convert_to_dense_matrix()])
+
+  def convert_to_dense_matrix(self):
+    """Returns a dense matrix corresponding to this sparse matrix."""
+    dense_mat = [[0 for column in range (self.columns)]
+                 for row in range(self.rows)]
+    for i in range(self.rows):
+      for j in range(self.rowStart[i], self.rowStart[i + 1]):
+        dense_mat[i][self.cols[j]] = self.vals[j]
+    return dense_mat
+
     
 
   def multiply(self, vector):
@@ -41,7 +59,11 @@ class SparseMatrix(object):
       Raises NonConformableException if the matrix and vector are non
           conformable.
     """
-    pass
+    if not isinstance(vector, vector.Vector):
+      raise Exception("Can only multiply by a vector")
+    # New empty 0 vector
+    new_vec = [0] * vector.length
+    
 
   def is_conformable(self, matrix):
     """Returns a boolean if the two matrices are conformable.

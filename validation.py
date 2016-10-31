@@ -33,7 +33,7 @@ def ValidateSparseMatrixProto(sparse_matrix_proto):
   """
   max_rows = sparse_matrix_proto.row_count
   max_columns = sparse_matrix_proto.column_count
-  collision_grid = [[False for col in range(max_columns)] for row in max_rows]
+  collision_grid = [[False for col in range(max_columns)] for row in range(max_rows)]
   if len(sparse_matrix_proto.values) > max_rows * max_columns:
     raise ValidationError("Too many values present in sparse matrix proto")
   for value in sparse_matrix_proto.values:
