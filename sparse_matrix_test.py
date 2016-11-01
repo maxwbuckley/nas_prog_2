@@ -20,6 +20,7 @@ class SparseMatrixTest(unittest.TestCase):
     matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
 
     print(matrix_a)
+
     self.assertEqual([0, 1, 2, 3], matrix_a.rowStart)
     self.assertEqual([0, 1, 2], matrix_a.cols)
     self.assertEqual([3.9, 7.8, 11.7], matrix_a.vals)
