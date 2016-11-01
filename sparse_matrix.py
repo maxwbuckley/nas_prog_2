@@ -9,14 +9,18 @@ class NonConformableException(Exception):
 
 class SparseMatrix(object):
   def __init__(self, sparse_matrix_proto):
-    # Lots to do here.
+    """Initialize Sparse Matrix.
+
+    Args:
+      sparse_matrix_proto: A sor_pb2.SparseMatrix proto.
+    """
     validation.ValidateSparseMatrixProto(sparse_matrix_proto)
     self.columns = sparse_matrix_proto.column_count
     self.rows = sparse_matrix_proto.row_count
-    self.rowStart, self.cols, self.vals = self._getCsrStructure(
+    self.rowStart, self.cols, self.vals = self._get_csr_structure(
       sparse_matrix_proto.values)
 
-  def _getCsrStructure(self, sparse_value_protos):
+  def _get_csr_structure(self, sparse_value_protos):
     temp_list = []
     for value in sparse_value_protos:
       temp_list.append((value.row_index, value.column_index, value.value))
@@ -36,9 +40,9 @@ class SparseMatrix(object):
     return rowStart, cols, vals
 
   def __repr__(self):
-    return '\n'.join([str(row) for row in self.convert_to_dense_matrix()])
+    return '\n'.join([str(row) for row in self.to_dense_matrix()])
 
-  def convert_to_dense_matrix(self):
+  def to_dense_matrix(self):
     """Returns a dense matrix corresponding to this sparse matrix."""
     dense_mat = [[0 for column in range (self.columns)]
                  for row in range(self.rows)]
@@ -65,11 +69,18 @@ class SparseMatrix(object):
     new_vec = [0] * vector.length
     
 
-  def is_conformable(self, matrix):
+  def is_conformable(self, vector):
     """Returns a boolean if the two matrices are conformable.
     
+    Args:
+      vector: a vector.Vector object.    
+
     Returns:
-      boolean.
+      boolean if this Matrix and that vector are conformable.
+    Raises:
+      NonConformableException if the dimensions don't match.
     """
-    pass
+    if this.columns == vector.length:
+      return True
+    raise NonConformableException
    

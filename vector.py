@@ -33,7 +33,17 @@ class Vector(object):
     self._name = name
     self._values = number_list
     self._length = len(self.values)
+ 
+  @property
+  def values(self):
+    return self._values
+ 
+  @property
+  def length(self):
+    return self._length
 
+  def __repr__(self):
+    return str(self.values)  
   
   def _fromProto(self, vector_proto):
     """Create a new vector object from the received vector proto.
@@ -47,7 +57,7 @@ class Vector(object):
     self._name = vector_proto.vector_name
     self._values = vector_proto.values
     # This was verified above.
-    self._length = len(self.values)
+    self._length = len(self._values)
     
  
   def toProto(self):

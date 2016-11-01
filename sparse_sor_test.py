@@ -1,12 +1,14 @@
 #! /usr/bin/python3
 """Unit tests associated with sparse_matrix.py."""
+import vector
+import sparse_sor
 import sparse_matrix
 from proto_genfiles.protos import sor_pb2
 import unittest
 
-class SparseMatrixTest(unittest.TestCase):
+class SparseSorSolverTest(unittest.TestCase):
 
-  def testSparseMatrixSetup(self):
+  def testSparseSorSolver(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
         matrix_name="a", row_count=3, column_count=3)
     for i in range(0, 3):
@@ -19,14 +21,11 @@ class SparseMatrixTest(unittest.TestCase):
 
     matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
 
-    expected = [[3.9, 0, 0],[0, 7.8, 0],[0, 0, 11.7]]
-    print(matrix_a)
+    vector_b = vector.Vector(name="b", number_list=[2 , 3, 4])
 
-    self.assertEqual(expected, matrix_a.to_dense_matrix())
-    self.assertEqual([0, 1, 2, 3], matrix_a.rowStart)
-    self.assertEqual([0, 1, 2], matrix_a.cols)
-    self.assertEqual([3.9, 7.8, 11.7], matrix_a.vals)
-
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_a, vector_b, 10, .0001, 1.0)
+    print(sparse_sor_solver)
 
 if __name__ == '__main__':
   unittest.main() 
