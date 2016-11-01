@@ -30,7 +30,9 @@ class ValidationTest(unittest.TestCase):
     self.assertTrue(validation.ValidateNumberList([1, 2, 4, 6.5]))
   
   def testValidateNumberList_Failure(self):
-    self.assertFalse(validation.ValidateNumberList(["Howdy", 2, 4, 6.5]))
+    self.assertRaises(
+        validation.ValidationError, validation.ValidateNumberList,
+        ["Howdy", 2, 4, 6.5])
 
 if __name__ == '__main__':
   unittest.main() 
