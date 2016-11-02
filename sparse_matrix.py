@@ -85,6 +85,7 @@ class SparseMatrix(object):
     # This does not get returned. Used to keep track.
     rows = [row]
     for i, row in enumerate(sorted_list):
+      # need to check for empty rows and resolve them.
       if row[0] > rows[-1]:
         rowStart.append(i + 1)
       cols.append(row[1])
@@ -101,6 +102,7 @@ class SparseMatrix(object):
     """Returns a dense matrix corresponding to this sparse matrix."""
     dense_mat = [[0 for column in range (self.columns)]
                  for row in range(self.rows)]
+    print(self.rowStart)
     for i in range(self.rows):
       for j in range(self.rowStart[i], self.rowStart[i + 1]):
         dense_mat[i][self.cols[j]] = self.vals[j]
