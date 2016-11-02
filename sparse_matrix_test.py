@@ -41,13 +41,13 @@ class SparseMatrixTest(unittest.TestCase):
 
     matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
 
-    expected = [[1, 0, 1], [0, 0, 0], [1, 0, 1]]
+    expected = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
     print(matrix_a)
 
     self.assertEqual(expected, matrix_a.to_dense_matrix())
-    self.assertEqual([0, 0, 2, 2, 3], matrix_a.rowStart)
-    self.assertEqual([0, 1, 2], matrix_a.cols)
-    self.assertEqual([1, 1, 1, 1], matrix_a.vals)
+    self.assertEqual([0, 2, 3, 4], matrix_a.rowStart)
+    self.assertEqual([0, 2, 1, 0, 2], matrix_a.cols)
+    self.assertEqual([1, 1, 1, 1, 1], matrix_a.vals)
 
   def testSparseMatrix_DenseMatrixSetup(self):
 
