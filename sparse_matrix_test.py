@@ -29,12 +29,12 @@ class SparseMatrixTest(unittest.TestCase):
   def testSparseMatrixSquare(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
         matrix_name="a", row_count=3, column_count=3)
-    square_values = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
-    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=square_values)
+    expected = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=expected)
 
     print(matrix_a)
 
-    self.assertEqual(square_values, matrix_a.to_dense_matrix())
+    self.assertEqual(expected, matrix_a.to_dense_matrix())
     self.assertEqual([0, 2, 3, 5], matrix_a.rowStart)
     self.assertEqual([0, 2, 1, 0, 2], matrix_a.cols)
     self.assertEqual([1, 1, 1, 1, 1], matrix_a.vals)
