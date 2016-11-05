@@ -30,7 +30,7 @@ class SparseMatrix(object):
     Args:
       dense_matrix: A list of lists with only numerical entries.
     """
-    # Needs validation
+    validation.ValidateNumberList(dense_matrix)
     self.columns = len(dense_matrix[0])
     self.rows = len(dense_matrix[0])
     self.rowStart, self.cols, self.vals = self._get_csr_structure(
