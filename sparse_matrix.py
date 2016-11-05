@@ -76,7 +76,6 @@ class SparseMatrix(object):
     elif dense_matrix is not None:
       temp_list = self._convert_dense_matrix_to_tuple_list(dense_matrix)
     sorted_list = sorted(temp_list, key=lambda element: (element[0], element[1]))
-    print(sorted_list)
     # popping left is O(n). Better to replace with a queue.
     row, col, val = sorted_list.pop(0)
     rowStart = [row]
@@ -87,7 +86,9 @@ class SparseMatrix(object):
     for i, row in enumerate(sorted_list):
       # need to check for empty rows and resolve them.
       if row[0] > rows[-1]:
-        rowStart.append(i + 1)
+        for _ in range(row[0] - rows[-1]):
+          # This is to account for potentially empty rows.
+          rowStart.append(i + 1)
       cols.append(row[1])
       vals.append(row[2])
       rows.append(row[0])
@@ -102,7 +103,6 @@ class SparseMatrix(object):
     """Returns a dense matrix corresponding to this sparse matrix."""
     dense_mat = [[0 for column in range (self.columns)]
                  for row in range(self.rows)]
-    print(self.rowStart)
     for i in range(self.rows):
       for j in range(self.rowStart[i], self.rowStart[i + 1]):
         dense_mat[i][self.cols[j]] = self.vals[j]
