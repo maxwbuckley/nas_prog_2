@@ -3,6 +3,7 @@
 import sparse_matrix
 from proto_genfiles.protos import sor_pb2
 import unittest
+import validation
 
 class SparseMatrixTest(unittest.TestCase):
 
@@ -51,6 +52,18 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertEqual([0, 1, 2, 1, 2], matrix_a.cols)
     self.assertEqual([9, 7, 16, 7.8, 11.7], matrix_a.vals)
     self.assertEqual(expected, matrix_a.to_dense_matrix())
+
+  def testSparseMatrix_InvalidMatrixLength(self):
+    matrix_a_proto = sor_pb2.SparseMatrix(
+      matrix_name='a', row_count=3, column_count=3)
+    for i in range(0, 4):
+      value = matrix_a_proto.values.add()
+      value.row_index = i
+      value.column_index = i
+      value.value = (i + 1) * 2
+    
+    self.assertRaises(validation.ValidationError,
+                      validation.ValidateSparseMatrixProto, matrix_a_proto)
 
 if __name__ == '__main__':
   unittest.main() 
