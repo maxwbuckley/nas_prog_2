@@ -53,7 +53,7 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertEqual([9, 7, 16, 7.8, 11.7], matrix_a.vals)
     self.assertEqual(expected, matrix_a.to_dense_matrix())
 
-  def testSparseMatrix_InvalidMatrixLength(self):
+  def testSparseMatrix_ProtosSetup_InvalidColumnCount(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
       matrix_name='a', row_count=3, column_count=3)
     for i in range(0, 4):
