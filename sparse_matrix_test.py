@@ -102,5 +102,40 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertRaises(validation.ValidationError,
                       validation.ValidateSparseMatrixProto, matrix_a_proto)
 
+  def testSparseMatrixIsSquareMatrix_True(self):
+    square_mat = [[8, 1, -1],
+                  [2, 9, -3],
+                  [1, -8, 10]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=square_mat)
+    self.assertTrue(matrix_a.is_square_matrix())
+  
+  def testSparseMatrixIsSquareMatrix_False(self):
+    non_square_mat = [[8, 1, -1, 0],
+                      [2, 9, -3, 9],
+                      [1, -8, 10, 0]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_square_mat)
+    self.assertFalse(matrix_a.is_square_matrix())
+
+  def testSparseMatrixIsStrictlyRowDiagonallyDominant_Success(self):
+    dd_mat = [[8, 1, -1],
+              [2, 9, -3],
+              [1, -8, 10]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=dd_mat)
+    self.assertTrue(matrix_a.is_strictly_row_diagonally_dominant())
+  
+  def testSparseMatrixIsStrictlyRowDiagonallyDominant_FailureNonDominant(self):
+    non_dd_mat = [[8, 1, -10],
+                  [12, 9, -3],
+                  [1, -8, 10]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_dd_mat)
+    self.assertFalse(matrix_a.is_strictly_row_diagonally_dominant())
+  
+  def testSparseMatrixIsStrictlyRowDiagonallyDominant_FailureNonSquare(self):
+    non_square_mat = [[8, 1, -1, 1],
+                      [2, 9, -3, 1],
+                      [1, -8, 10, 1]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_square_mat)
+    self.assertFalse(matrix_a.is_strictly_row_diagonally_dominant())
+
 if __name__ == '__main__':
   unittest.main() 

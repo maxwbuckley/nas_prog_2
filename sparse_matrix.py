@@ -31,7 +31,7 @@ class SparseMatrix(object):
       dense_matrix: A list of lists with only numerical entries.
     """
     # Add validation
-    self.columns = len(dense_matrix[0])
+    self.columns = len(dense_matrix)
     self.rows = len(dense_matrix[0])
     self.rowStart, self.cols, self.vals = self._get_csr_structure(
       dense_matrix=dense_matrix)
@@ -108,7 +108,29 @@ class SparseMatrix(object):
         dense_mat[i][self.cols[j]] = self.vals[j]
     return dense_mat
 
-    
+  def is_square_matrix(self):
+    """Describe me."""
+    return self.columns == self.rows
+
+
+  def is_strictly_row_diagonally_dominant(self):
+    """Checks whether matrix is diagonally dominant.
+  
+    Returns:
+      Boolean of whether or not it is diagonally dominant.
+    """
+    if not self.is_square_matrix():
+      # All diagonally dominant matrices are square
+      return False
+    dense_mat = self.to_dense_matrix()
+    for i, _ in enumerate(dense_mat):
+      abs_row_sum = 0  
+      for j, _ in enumerate(dense_mat[i]):
+          if i != j:
+            abs_row_sum += abs(dense_mat[i][j])
+      if abs(dense_mat[i][i]) <= abs_row_sum:
+        return False
+    return True
 
   def multiply(self, vector):
     """Multiply this matrix by the target vector
