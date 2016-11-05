@@ -26,7 +26,7 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertEqual([0, 1, 2], matrix_a.cols)
     self.assertEqual([3.9, 7.8, 11.7], matrix_a.vals)
 
-  def testSparseMatrixSquare(self):
+  def testSparseMatrix_DenseMatrix(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
         matrix_name="a", row_count=3, column_count=3)
     expected = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
