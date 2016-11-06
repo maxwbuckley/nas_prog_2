@@ -42,12 +42,18 @@ class SparseSorSolver(object):
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
-        Stopping Reason: %(STOP_REASON)s
-        Computed vector x: %(OUTPUT_X)s"""
+        Stopping reason: %(STOP_REASON)s
+        Computed vector x: %(OUTPUT_X)s
+        Sum of absolute residual: %(RESIDUAL)s
+        """
+
     return print_template % {
-        "MATRIX_A": self.A, "VECTOR_B": self.b, "STOP_REASON":
-        sor_pb2.SorReturnValue.StoppingReason.Name(self.stopping_reason),
-                             "OUTPUT_X": self.x}
+        "MATRIX_A": self.A,
+        "VECTOR_B": self.b,
+        "STOP_REASON":
+            sor_pb2.SorReturnValue.StoppingReason.Name(self.stopping_reason),
+        "OUTPUT_X": self.x,
+        "RESIDUAL": self.compute_absolute_residual_sum()}
 
   def sparse_sor(self):
     """Compute the sparse sor solution for Ax = b.
