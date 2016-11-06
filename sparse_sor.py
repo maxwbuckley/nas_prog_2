@@ -1,6 +1,8 @@
 """Docstring"""
 import sparse_matrix
 import vector
+from proto_genfiles.protos import sor_pb2
+
 
 class SorSolverInputException(Exception):
   """An exception for when the inputs are not compatible."""
@@ -18,46 +20,97 @@ class SparseSorSolver(object):
     """
     # Need to perform checks here.
     if not matrix.is_strictly_row_diagonally_dominant():
-      raise SorSolverInputException("Input matrix is not diagonally dominant.")
+      # This is also checking for zero on diagonal.
+      raise SorSolverInputException("Input matrix is not strictly diagonally "
+                                    "dominant.")
     self.A = matrix
     self.b = vector
     self.maxits = maxits
     self.tolerance = e
     self.relaxation_rate = w
 
+    self.machine_epsilon = 2 ** -52
+    self.sor_return_proto = sor_pb2.SorReturnValue()
     # Fill out
-    self.stopping_reason = None
+    self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
     self.x = [0] * self.b.length
+    self.x_old = None
+    self.total_old = float("inf")
     self.sparse_sor()
- 
+
   def __repr__(self):
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
-        Output Vector b: %(VECTOR_B)s
-        Stopping Reason: %(STOP_REASON)s
-        Computed vector x: %(OUTPUT_X)s"""
-    return print_template % {"MATRIX_A": self.A, "VECTOR_B": self.b,
-                             "STOP_REASON": self.stopping_reason,
-                             "OUTPUT_X": self.x}
- 
+        Input Vector b: %(VECTOR_B)s
+        Stopping reason: %(STOP_REASON)s
+        Computed vector x: %(OUTPUT_X)s
+        Sum of absolute residual: %(RESIDUAL)s
+        """
+
+    return print_template % {
+        "MATRIX_A": self.A,
+        "VECTOR_B": self.b,
+        "STOP_REASON":
+            sor_pb2.SorReturnValue.StoppingReason.Name(self.stopping_reason),
+        "OUTPUT_X": self.x,
+        "RESIDUAL": self.compute_absolute_residual_sum()}
+
   def sparse_sor(self):
     """Compute the sparse sor solution for Ax = b.
     Returns:
       A list of numeric values and a termination reason.
     """
     k = 0
-    while not self.converged() and k <= self.maxits:
+    while not self.is_converged() and k <= self.maxits:
+      self.x_old = self.x[:]
       for i in range(self.b.length):
         sum = 0
         for j in range(self.A.rowStart[i], self.A.rowStart[i + 1]):
           sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
           if self.A.cols[j] == i:
             d = self.A.vals[j]
-        self.x[i] = self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d
+        self.x[i] = (
+            self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
       k += 1
-    # Need to set stopping rule.
+    if k >= self.maxits:
+      self.stopping_reason = (
+          sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
+  def compute_absolute_residual_sum(self):
+    """Computes the sum of the absolute deviations from Ax from b"""
+    estimate = self.A.multiply_by_vector(vector.Vector(number_list=self.x))
+    residual_total = 0
+    for i in range(len(estimate)):
+      residual_total += abs(self.b.values[i] - estimate[i])
+    return residual_total
 
-  def converged(self):
-    # Use the tolerance tests here.
+  def is_converged(self):
+    """Performs a series of convergence checks.
+
+    Updates the self.stopping_reason variable if necessary
+
+    Returns:
+      boolean whether we should stop.
+    """
+    if self.x_old is None:
+      return False
+    x_total = 0
+    for i in range(len(self.x)):
+      x_total += abs(self.x[i] - self.x_old[i])
+    if x_total > self.total_old:
+      self.stopping_reason = (
+          sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
+      return True
+    # Threshold is defined as the sum of the passed tolerance and a multiple
+    # of machine epsilon.
+    threshold = (
+        self.tolerance + 4.0 * self.machine_epsilon * abs(x_total))
+    if x_total <= threshold:
+      self.stopping_reason = (
+          sor_pb2.SorReturnValue.X_SEQUENCE_CONVERGENCE)
+      return True
+    if self.compute_absolute_residual_sum() <= threshold:
+      self.stopping_reason = (
+          sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
+      return True
     return False

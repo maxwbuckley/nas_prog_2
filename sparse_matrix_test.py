@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 """Unit tests associated with sparse_matrix.py."""
 import sparse_matrix
+import vector
 from proto_genfiles.protos import sor_pb2
 import unittest
 import validation
@@ -37,7 +38,7 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertEqual([0, 2, 3, 5], matrix_a.rowStart)
     self.assertEqual([0, 2, 1, 0, 2], matrix_a.cols)
     self.assertEqual([1, 1, 1, 1, 1], matrix_a.vals)
-    
+
     expected = [[9, 7, 16],
                 [0, 7.8, 0],
                 [0, 0, 11.7]]
@@ -55,7 +56,6 @@ class SparseMatrixTest(unittest.TestCase):
                 [0, 0, 1]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=expected)
 
-
     self.assertEqual([0, 1, 1, 2], matrix_a.rowStart)
     self.assertEqual([0, 2], matrix_a.cols)
     self.assertEqual([1, 1], matrix_a.vals)
@@ -68,7 +68,6 @@ class SparseMatrixTest(unittest.TestCase):
                 [0, 0, 1, 0, 0],
                 [1, 1, 1, 1, 1]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=expected)
-
 
     self.assertEqual([0, 2, 3, 4, 5, 10], matrix_a.rowStart)
     self.assertEqual([0, 4, 2, 2, 2, 0, 1, 2, 3, 4], matrix_a.cols)
@@ -83,12 +82,10 @@ class SparseMatrixTest(unittest.TestCase):
                 [1, 1, 1, 1, 1]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=expected)
 
-
     self.assertEqual([0, 2, 3, 3, 4, 9], matrix_a.rowStart)
     self.assertEqual([0, 4, 2, 2, 0, 1, 2, 3, 4], matrix_a.cols)
     self.assertEqual([1, 1, 1, 1, 1, 1, 1, 1, 1], matrix_a.vals)
     self.assertEqual(expected, matrix_a.to_dense_matrix())
-  
 
   def testSparseMatrix_ProtosSetup_InvalidColumnCount(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
@@ -98,7 +95,7 @@ class SparseMatrixTest(unittest.TestCase):
       value.row_index = i
       value.column_index = i
       value.value = (i + 1) * 2
-    
+
     self.assertRaises(validation.ValidationError,
                       validation.ValidateSparseMatrixProto, matrix_a_proto)
 
@@ -108,7 +105,7 @@ class SparseMatrixTest(unittest.TestCase):
                   [1, -8, 10]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=square_mat)
     self.assertTrue(matrix_a.is_square_matrix())
-  
+
   def testSparseMatrixIsSquareMatrix_False(self):
     non_square_mat = [[8, 1, -1, 0],
                       [2, 9, -3, 9],
@@ -122,14 +119,14 @@ class SparseMatrixTest(unittest.TestCase):
               [1, -8, 10]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=dd_mat)
     self.assertTrue(matrix_a.is_strictly_row_diagonally_dominant())
-  
+
   def testSparseMatrixIsStrictlyRowDiagonallyDominant_FailureNonDominant(self):
     non_dd_mat = [[8, 1, -10],
                   [12, 9, -3],
                   [1, -8, 10]]
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_dd_mat)
     self.assertFalse(matrix_a.is_strictly_row_diagonally_dominant())
-  
+
   def testSparseMatrixIsStrictlyRowDiagonallyDominant_FailureNonSquare(self):
     non_square_mat = [[8, 1, -1, 1],
                       [2, 9, -3, 1],
@@ -137,5 +134,22 @@ class SparseMatrixTest(unittest.TestCase):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_square_mat)
     self.assertFalse(matrix_a.is_strictly_row_diagonally_dominant())
 
+  def testSparseMatrixMultiplyByVectorSquareMatrix(self):
+    square_mat = [[8, 1, -1],
+                  [2, 9, -3],
+                  [1, -8, 10]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=square_mat)
+    vector_b = vector.Vector(number_list=[1, 2, 3])
+    self.assertEqual([7, 11, 15], matrix_a.multiply_by_vector(vector_b))
+
+  def testSparseMatrixMultiplyByVectorNonSquareMatrix(self):
+    non_square_mat = [[8, 1, -1, 1],
+                      [2, 9, -3, 1],
+                      [1, -8, 10, 1]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=non_square_mat)
+    vector_b = vector.Vector(number_list=[1, 2, 3, 4])
+    self.assertEqual([11, 15, 19], matrix_a.multiply_by_vector(vector_b))
+
+
 if __name__ == '__main__':
-  unittest.main() 
+  unittest.main()

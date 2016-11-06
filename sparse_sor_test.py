@@ -29,7 +29,7 @@ class SparseSorSolverTest(unittest.TestCase):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 10, .0001, 1.0)
     print(sparse_sor_solver)
-  
+
   def testSparseSorSolver_ClassExample(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[7, 1, 0],
@@ -39,8 +39,8 @@ class SparseSorSolverTest(unittest.TestCase):
     vector_b = vector.Vector(name="b", number_list=[1, 1, 1])
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_a, vector_b, 10, .0001, 1.25)
-    print(sparse_sor_solver)  
+        matrix_a, vector_b, 10, 10**-20, 1.0)
+    print(sparse_sor_solver) 
   
   def testSparseSorSolver_SolvedExample(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
@@ -56,7 +56,7 @@ class SparseSorSolverTest(unittest.TestCase):
     expected = [1, 2, -2]
     
     self.assertTrue(all(
-      almost_equal(*values) for values in zip(expected, sparse_sor_solver.x)))
+        almost_equal(*values) for values in zip(expected, sparse_sor_solver.x)))
 
 if __name__ == '__main__':
-  unittest.main() 
+  unittest.main()

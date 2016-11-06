@@ -23,7 +23,7 @@ class SparseMatrix(object):
       self.from_proto(sparse_matrix_proto)
     else:
       self.from_dense_matrix(dense_matrix)
-  
+
   def from_dense_matrix(self, dense_matrix):
     """Construct from dense matrix.
 
@@ -31,8 +31,8 @@ class SparseMatrix(object):
       dense_matrix: A list of lists with only numerical entries.
     """
     # Add validation
-    self.columns = len(dense_matrix)
-    self.rows = len(dense_matrix[0])
+    self.columns = len(dense_matrix[0])
+    self.rows = len(dense_matrix)
     self.rowStart, self.cols, self.vals = self._get_csr_structure(
       dense_matrix=dense_matrix)
 
@@ -115,7 +115,7 @@ class SparseMatrix(object):
 
   def is_strictly_row_diagonally_dominant(self):
     """Checks whether matrix is diagonally dominant.
-  
+
     Returns:
       Boolean of whether or not it is diagonally dominant.
     """
@@ -123,18 +123,18 @@ class SparseMatrix(object):
       # All diagonally dominant matrices are square
       return False
     dense_mat = self.to_dense_matrix()
-    for i, _ in enumerate(dense_mat):
-      abs_row_sum = 0  
-      for j, _ in enumerate(dense_mat[i]):
+    for i in range(len(dense_mat)):
+      abs_row_sum = 0
+      for j in range(len(dense_mat[i])):
           if i != j:
             abs_row_sum += abs(dense_mat[i][j])
       if abs(dense_mat[i][i]) <= abs_row_sum:
         return False
     return True
 
-  def multiply(self, vector):
+  def multiply_by_vector(self, vector_object):
     """Multiply this matrix by the target vector
-  
+
       Args:
         vector:
       Returns:
@@ -142,24 +142,29 @@ class SparseMatrix(object):
       Raises NonConformableException if the matrix and vector are non
           conformable.
     """
-    if not isinstance(vector, vector.Vector):
+    if not isinstance(vector_object, vector.Vector):
       raise Exception("Can only multiply by a vector")
+    if not self.is_conformable(vector_object):
+      raise NonConformableException("")
     # New empty 0 vector
-    new_vec = [0] * vector.length
-    
+    new_vec = [0] * self.rows
+    for i in range(self.rows):
+      for j in range(self.rowStart[i], self.rowStart[i + 1]):
+          new_vec[i] += self.vals[j] * vector_object.values[self.cols[j]]
+    return new_vec
 
-  def is_conformable(self, vector):
+  def is_conformable(self, vector_object):
     """Returns a boolean if the two matrices are conformable.
-    
+
     Args:
-      vector: a vector.Vector object.    
+      vector: a vector.Vector object.
 
     Returns:
       boolean if this Matrix and that vector are conformable.
     Raises:
       NonConformableException if the dimensions don't match.
     """
-    if this.columns == vector.length:
+    if self.columns == vector_object.length:
       return True
-    raise NonConformableException
-   
+    return False
+
