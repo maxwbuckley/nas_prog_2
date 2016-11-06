@@ -34,6 +34,8 @@ class SparseSorSolver(object):
     # Fill out
     self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
     self.x = [0] * self.b.length
+    self.x_old = None
+    self.total_old = float("inf")
     self.sparse_sor()
 
   def __repr__(self):
@@ -53,7 +55,6 @@ class SparseSorSolver(object):
       A list of numeric values and a termination reason.
     """
     k = 0
-    self.x_old = None
     while not self.is_converged() and k <= self.maxits:
       self.x_old = self.x[:]
       for i in range(self.b.length):
@@ -69,6 +70,13 @@ class SparseSorSolver(object):
       self.stopping_reason = (
           sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
+  def compute_absolute_residual_sum(self):
+    """Computes the sum of the absolute deviations from Ax from b"""
+    estimate = self.A.multiply_by_vector(vector.Vector(number_list=self.x))
+    residual_total = 0
+    for i in range(len(estimate)):
+      residual_total += abs(self.b.values[i] - estimate[i])
+    return residual_total
 
   def is_converged(self):
     """Performs a series of convergence checks.
@@ -79,7 +87,6 @@ class SparseSorSolver(object):
       boolean whether we should stop.
     """
     if self.x_old is None:
-      self.total_old = float("inf")
       return False
     x_total = 0
     for i in range(len(self.x)):
@@ -88,10 +95,6 @@ class SparseSorSolver(object):
       self.stopping_reason = (
           sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
       return True
-    estimate = self.A.multiply_by_vector(vector.Vector(number_list=self.x))
-    residual_total = 0
-    for i in range(len(estimate)):
-      residual_total += abs(self.b.values[i] - estimate[i])
     # Threshold is defined as the sum of the passed tolerance and a multiple
     # of machine epsilon.
     threshold = (
@@ -100,7 +103,7 @@ class SparseSorSolver(object):
       self.stopping_reason = (
           sor_pb2.SorReturnValue.X_SEQUENCE_CONVERGENCE)
       return True
-    if residual_total <= threshold:
+    if self.compute_absolute_residual_sum() <= threshold:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
