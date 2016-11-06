@@ -7,7 +7,7 @@ def VectorProtoExample():
   """Create an example Vector proto."""
   vector_b = sor_pb2.Vector(vector_name="b", length=3)
   for i in range(3, 6):
-    vector_b.values.append(i)
+    vector_b.values.append(float(i))
   return vector_b
 
 def SparseMatrixProtoExample():
@@ -25,7 +25,6 @@ def SparseMatrixProtoExample():
 
 vector_b = VectorProtoExample()
 matrix_a = SparseMatrixProtoExample()
-print("")
 # This is just the default printing behavior for a proto.
-print(vector_b)
 print(matrix_a)
+print(vector_b)

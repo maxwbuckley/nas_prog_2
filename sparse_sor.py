@@ -2,6 +2,9 @@
 import sparse_matrix
 import vector
 
+class SorSolverInputException(Exception):
+  """An exception for when the inputs are not compatible."""
+
 class SparseSorSolver(object):
   def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0):
     """Docstring
@@ -14,6 +17,8 @@ class SparseSorSolver(object):
       w: float relaxation rate.
     """
     # Need to perform checks here.
+    if not matrix.is_strictly_row_diagonally_dominant():
+      raise SorSolverInputException("Input matrix is not diagonally dominant.")
     self.A = matrix
     self.b = vector
     self.maxits = maxits
@@ -54,5 +59,5 @@ class SparseSorSolver(object):
 
 
   def converged(self):
-    # Use the tolerance here.
+    # Use the tolerance tests here.
     return False

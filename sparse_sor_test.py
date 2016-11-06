@@ -8,7 +8,7 @@ import unittest
 
 class SparseSorSolverTest(unittest.TestCase):
 
-  def testSparseSorSolver(self):
+  def testSparseSorSolver_MatrixProto(self):
     matrix_a_proto = sor_pb2.SparseMatrix(
         matrix_name="a", row_count=3, column_count=3)
     for i in range(0, 3):
@@ -21,7 +21,19 @@ class SparseSorSolverTest(unittest.TestCase):
 
     matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
 
-    vector_b = vector.Vector(name="b", number_list=[2 , 3, 4])
+    vector_b = vector.Vector(name="b", number_list=[2, 3, 4])
+
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_a, vector_b, 10, .0001, 1.0)
+    print(sparse_sor_solver)
+  
+  def testSparseSorSolver_ClassExample(self):
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
+        [[7, 1, 0],
+         [1, -7, 1],
+         [0, 1, 8]])
+
+    vector_b = vector.Vector(name="b", number_list=[1, 1, 1])
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 10, .0001, 1.0)

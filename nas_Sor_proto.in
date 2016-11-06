@@ -1,0 +1,23 @@
+matrix_name: "a"
+row_count: 3
+column_count: 3
+values {
+  value: 3.9
+}
+values {
+  row_index: 1
+  column_index: 1
+  value: 7.8
+}
+values {
+  row_index: 2
+  column_index: 2
+  value: 11.7
+}
+
+vector_name: "b"
+length: 3
+values: 3.0
+values: 4.0
+values: 5.0
+
