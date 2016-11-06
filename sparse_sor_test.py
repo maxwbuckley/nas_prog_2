@@ -26,7 +26,7 @@ class SparseSorSolverTest(unittest.TestCase):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 10, .0001, 1.0)
     print(sparse_sor_solver)
-  
+
   def testSparseSorSolver_ClassExample(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[7, 1, 0],
@@ -36,8 +36,9 @@ class SparseSorSolverTest(unittest.TestCase):
     vector_b = vector.Vector(name="b", number_list=[1, 1, 1])
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_a, vector_b, 10, .0001, 1.0)
+        matrix_a, vector_b, 10, 10**-20, 1.0)
     print(sparse_sor_solver)
 
+
 if __name__ == '__main__':
-  unittest.main() 
+  unittest.main()
