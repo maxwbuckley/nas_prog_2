@@ -32,6 +32,7 @@ class SparseSorSolver(object):
     self.machine_epsilon = 2 ** -52
     self.sor_return_proto = sor_pb2.SorReturnValue()
     # Fill out
+    self.iteration = 0
     self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
     self.x = [0] * self.b.length
     self.x_old = None
@@ -43,6 +44,7 @@ class SparseSorSolver(object):
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
         Stopping reason: %(STOP_REASON)s
+        Stopping iteration: %(ITERATION)s
         Computed vector x: %(OUTPUT_X)s
         Sum of absolute residual: %(RESIDUAL)s
         """
@@ -52,6 +54,7 @@ class SparseSorSolver(object):
         "VECTOR_B": self.b,
         "STOP_REASON":
             sor_pb2.SorReturnValue.StoppingReason.Name(self.stopping_reason),
+        "ITERATION": self.iteration,
         "OUTPUT_X": self.x,
         "RESIDUAL": self.compute_absolute_residual_sum()}
 
@@ -60,8 +63,7 @@ class SparseSorSolver(object):
     Returns:
       A list of numeric values and a termination reason.
     """
-    k = 0
-    while not self.is_converged() and k <= self.maxits:
+    while not self.is_converged() and self.iteration < self.maxits:
       self.x_old = self.x[:]
       for i in range(self.b.length):
         sum = 0
@@ -71,8 +73,8 @@ class SparseSorSolver(object):
             d = self.A.vals[j]
         self.x[i] = (
             self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
-      k += 1
-    if k >= self.maxits:
+      self.iteration += 1
+    if self.iteration >= self.maxits:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
@@ -84,6 +86,17 @@ class SparseSorSolver(object):
       residual_total += abs(self.b.values[i] - estimate[i])
     return residual_total
 
+  def compute_absolute_x_sequence_difference_sum(self):
+    """Calculate the absolute difference between the current x and last x."""
+    x_diff_sum = 0
+    for i in range(len(self.x)):
+      x_diff_sum += abs(self.x[i] - self.x_old[i])
+    return x_diff_sum
+
+  def calculate_stopping_threshold(self, value):
+    """Calculate the stopping threshold for a given value."""
+    return self.tolerance + 4.0 * self.machine_epsilon * abs(value)
+
   def is_converged(self):
     """Performs a series of convergence checks.
 
@@ -94,22 +107,18 @@ class SparseSorSolver(object):
     """
     if self.x_old is None:
       return False
-    x_total = 0
-    for i in range(len(self.x)):
-      x_total += abs(self.x[i] - self.x_old[i])
+    x_total = self.compute_absolute_x_sequence_difference_sum()
     if x_total > self.total_old:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
       return True
-    # Threshold is defined as the sum of the passed tolerance and a multiple
-    # of machine epsilon.
-    threshold = (
-        self.tolerance + 4.0 * self.machine_epsilon * abs(x_total))
-    if x_total <= threshold:
+    x_threshold = self.calculate_stopping_threshold(x_total)
+    if x_total <= x_threshold:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.X_SEQUENCE_CONVERGENCE)
       return True
-    if self.compute_absolute_residual_sum() <= threshold:
+    residual_threshold = self.calculate_stopping_threshold(1)
+    if self.compute_absolute_residual_sum() <= residual_threshold:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
