@@ -6,7 +6,7 @@ import sparse_matrix
 from proto_genfiles.protos import sor_pb2
 import unittest
 
-def almost_equal(value_1, value_2, accuracy = 10**4):
+def almost_equal(value_1, value_2, accuracy = 10**-4):
   return abs(value_1 - value_2) < accuracy
 
 class SparseSorSolverTest(unittest.TestCase):
