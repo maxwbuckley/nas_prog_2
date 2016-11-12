@@ -23,6 +23,11 @@ class SparseSorSolver(object):
       # This is also checking for zero on diagonal.
       raise SorSolverInputException("Input matrix is not strictly diagonally "
                                     "dominant.")
+    if not matrix.rows == vector.length:
+      print("Matrix rows: %s" % matrix.rows)
+      print("Vector length: %s" % vector.length)
+      raise Exception("Lengths are not conformable Ax = b hence rows in A "
+                      "must equal rows in b")
     self.A = matrix
     self.b = vector
     self.maxits = maxits
@@ -123,3 +128,11 @@ class SparseSorSolver(object):
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
     return False
+
+  def get_solution(self):
+    """Returns the solution vector x.
+
+    Returns:
+      A vector.Vector of the solution x.
+    """
+    return vector.Vector(number_list = self.x)
