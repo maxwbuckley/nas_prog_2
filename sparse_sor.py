@@ -9,11 +9,11 @@ class SorSolverInputException(Exception):
 
 class SparseSorSolver(object):
   def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0):
-    """Docstring
+    """Initialize Sparse SOR Solver
 
     Args:
-      A: A sparse_matrix.Matrix. This needs to be diagonally dominant.
-      b: A vector.Vector
+      matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
+      vector: A vector.Vector
       maxits: The maximum number of iterations to run before stopping.
       e: float tolerance.
       w: float relaxation rate.
@@ -45,6 +45,7 @@ class SparseSorSolver(object):
     self.sparse_sor()
 
   def __repr__(self):
+    """Change print format"""
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
