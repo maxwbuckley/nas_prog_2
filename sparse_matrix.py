@@ -51,10 +51,11 @@ class SparseMatrix(object):
 
   def _convert_dense_matrix_to_tuple_list(self, dense_matrix):
     """Convert a dense matrix into a list of its non 0 valued tuples.
+    
     Args:
       dense_matrix: A list of lists with only numerical entries.
     Returns:
-      A list of tuples of the form row index, col_indes, value.
+      A list of tuples of the form row index, col_index, value.
     """
     tuple_list = []
     for i in range(len(dense_matrix)):
@@ -64,6 +65,13 @@ class SparseMatrix(object):
     return tuple_list
 
   def _convert_proto_to_tuple_list(self, sparse_value_proto):
+    """Convert a proto into a list of its non 0 valued tuples.
+    
+    Args:
+      sparse_value_proto: sor_pb2.SparseMatrix proto.
+    Returns:
+      A list of tuples of the form row index, col_index, value.
+    """
     tuple_list = []
     for value in sparse_value_proto:
       tuple_list.append((value.row_index, value.column_index, value.value))
