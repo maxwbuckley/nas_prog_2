@@ -78,6 +78,14 @@ class SparseMatrix(object):
     return tuple_list
 
   def _get_csr_structure(self, sparse_value_proto=None, dense_matrix=None):
+    """Convert either a proto or a dense matrix into csr format
+    
+    Args:
+      sparse_value_proto: sor_pb2.SparseMatrix proto.
+      dense_matrix: A list of lists with only numerical entries.
+    Returns:
+      Three lists; the rowstart, column and values in the matrix
+    """
     # Need some checking
     if sparse_value_proto is not None:
       temp_list = self._convert_proto_to_tuple_list(sparse_value_proto)
@@ -105,6 +113,7 @@ class SparseMatrix(object):
     return rowStart, cols, vals
 
   def __repr__(self):
+    """Change print format to print csr in dense form."""
     return '\n'.join([str(row) for row in self.to_dense_matrix()])
 
   def to_dense_matrix(self):
