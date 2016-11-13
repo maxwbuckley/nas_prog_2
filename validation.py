@@ -49,7 +49,15 @@ def ValidateSparseMatrixProto(sparse_matrix_proto):
   return True
 
 def ValidateNumberList(number_list):
-  """Describe"""
+  """Check if number_list passed into vector is consistent
+  
+  Args:
+    number_list: A list of numbers
+  Returns:
+    True if the input is valid.
+  Raises:
+    ValidationError if the input is invalid.
+  """
   if all([isinstance(number, numbers.Number) for number in number_list]):
     return True  
   raise ValidationError("Non numbers passed in list")
