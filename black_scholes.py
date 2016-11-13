@@ -6,11 +6,11 @@ import vector
 import sparse_sor
 
 
-r = 0.02 # Per timestep
+r = 0.02/365 # Per timestep
 sigma = .3 # Per timestep
 stock_price_max = 2.0 # dollars, can be a float.
 h = 200 # price sub intervals. Int
-timesteps = 5 # days Int
+timesteps = 30 # days Int
 k = 5 # time sub_intervals (trading hours)? Int
 strike_price = 1.00 # Price at which we can sell our asset at time 0
 
@@ -41,8 +41,8 @@ def generate_black_scholes_matrix(
         be added to f_1, m+1.
   """
   # Discuss with guys.
-  r = r_base # / subintervals
-  sigma = sigma_base #  / subintervals
+  r = r_base / subintervals
+  sigma = sigma_base  / subintervals
   # End discussion.
   k = subintervals
   grid =[[0 for _ in range(N)] for _ in range(N)]
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
   time_step = 1
   while time_step < time_intervals:
-    f_vector = option_price_grid[time_step - 1]
+    f_vector = option_price_grid[time_step - 1][:]
     # Need to adjust 1st element by adding adjustment term.
     f_vector[1] += adjustment
     f = vector.Vector(number_list=f_vector[1:-1])
@@ -96,4 +96,4 @@ if __name__ == "__main__":
         [strike_price] + sparse_sor_solver.get_solution().values + [0])
     time_step += 1
 
-  print(*zip(stock_price_array, option_price_grid[1]))
+  print(*zip(stock_price_array, option_price_grid[-1]))
