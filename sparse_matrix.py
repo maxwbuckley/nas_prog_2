@@ -117,7 +117,10 @@ class SparseMatrix(object):
     return dense_mat
 
   def is_square_matrix(self):
-    """Describe me."""
+    """Checks whether matrix is square.
+    Returns:
+      Boolean of whether or not it is square.
+    """
     return self.columns == self.rows
 
 
