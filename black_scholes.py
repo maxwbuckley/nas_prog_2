@@ -1,50 +1,47 @@
 #! /usr/bin/python3
+"""This script is for running the black sholes algorithm for option pricing."""
 
 import math
 import sparse_matrix
 import vector
 import sparse_sor
 
+# These values can be adjusted as required.
 
-r = 0.02/365 # Per timestep
-sigma = .3 # Per timestep
-stock_price_max = 2.0 # dollars, can be a float.
-h = 200 # price sub intervals. Int
-timesteps = 30 # days Int
-k = 5 # time sub_intervals (trading hours)? Int
-strike_price = 1.00 # Price at which we can sell our asset at time 0
+r = 0.02 # Risk free rate of return, per year.
+sigma = .2 # Daily standard deviation, per year.
+stock_price_max = 2.0 # dollars, Float.
+h = 200 # price sub intervals, Int.
+timesteps = 30 # days, Int.
+strike_price = 1.0 # Price at which we can sell our asset at time 0.
 
-def start_price(strike_price, stock_price_time_0):
-  """This calculates the price of the option at time 0.
+k = 1/365 # scalar for  converting rates to relevant time period of days.
+
+def start_prices(strike_price, stock_prices_time_0):
+  """This calculates the list of start prices of the option at time 0.
 
   Args:
     strike_price: The strike price of the option in question.
-    stock_price_time_0: the stock price at time 0.
+    stock_price_time_0: List of all the possible stock prices at time 0.
   Returns:
-    A float greater than or equal to 0.
+    A list of the prices of the option.
   """
-  return max(strike_price - stock_price_time_0, 0)
+  return [max(strike_price - stock_price, 0) for
+          stock_price in stock_prices_time_0]
 
-def generate_black_scholes_matrix(
-  strike_price, N, subintervals, sigma_base, r_base):
+
+def generate_black_scholes_matrix(N, k, sigma, r):
   """Generates the black scholes matrix and adjustment
 
   Args:
-    strike_price: The strike price of the option in question.
     N: The desired dimension of the matrix. we want to work from 0 to N-1.
-    subintervals: k the number of intervals into which each timestep is broken.
-    sigma_base: The base standard_deviation
-    r_base: The base risk free rate.
+    k: The number of intervals into which each timestep is broken.
+    sigma: The standard deviation
+    r: The risk free rate.
 
   Returns:
-    A tuple of a dense matrix (list of lists) and a float adjustment figure to
-        be added to f_1, m+1.
+    A dense matrix (list of lists).
   """
-  # Discuss with guys.
-  r = r_base / subintervals
-  sigma = sigma_base  / subintervals
-  # End discussion.
-  k = subintervals
   grid =[[0 for _ in range(N)] for _ in range(N)]
   for i in range(N):
     n = i + 1
@@ -56,37 +53,63 @@ def generate_black_scholes_matrix(
     if i < N - 1:
       # Append final element
       grid[i][i + 1] =  -((n * k) / 2) * (n * (sigma ** 2) + r)
-  # This is only here due to adjustments to r and sigma above.
-  adjustment_term = (k / 2) * (sigma ** 2 - r) * strike_price
-  return (grid, adjustment_term)
+  return grid
 
 
-if __name__ == "__main__":
-  if (k / h ** 2) >= 1 / 2:
-    raise Exception("k/h**2 needs to be less than 1/2 for stability")
+def generate_adjustment_term(strike_price, k, sigma, r):
+  """Generate the adjustment term for f_(1,m+1).
 
+  Args:
+    strike_price: The strike price of the option in question.
+    k: k the number of intervals into which each timestep is broken.
+    sigma: The standard deviation
+    r: The risk free rate.
 
-  price_intervals = h + 1
-  time_intervals = (timesteps * k) + 1
+  Returns:
+    A float adjustment figure to be added to f_(1, m+1).
+  """
+  return ((k / 2) * (sigma ** 2 - r) * strike_price)
 
-  print("Price intervals: %s\nTime_intervals: %s" % (
-      price_intervals, time_intervals))
-  stock_price_array = [stock_price_max * (price / h) for price in range(
-      price_intervals)]
-  option_price_grid =[[None for _ in range(price_intervals)] for _ in range(
-      time_intervals)]
+def generate_stock_price_array(stock_price_max, h):
+  """Generates the list of potentital stock prices.
+
+  Args:
+    stock_price_max: At stock price at which the option is worth 0.
+    h: The number of intervals we want to split 0 to the max price into.
+  Returns:
+    A list of the stock prices in order from lowest to highest.
+  """
+  return [stock_price_max * (price / h) for price in range(
+          h + 1)]
+
+def generate_option_price_grid(
+    timesteps, strike_price, h, k, sigma, r, stock_price_array):
+  """Generate the matrix of option prices for each price, timestep pair.
+
+  Args:
+    timesteps: The integer number of timesteps to run for.
+    strike_price: The strike price of the option in question.
+    h: h the number of intervals into which the price is broken.
+    k: k the number of intervals into which each timestep is broken.
+    sigma: The standard deviation
+    r: The risk free rate.
+
+  Returns:
+    A list of lists matrix. The  rows are for different stock prices and the
+        columns are the different timesteps.
+  """
+  option_price_grid =[[None for _ in range(h + 1)] for _ in range(
+      timesteps + 1)]
   # row is across prices columns are over time
-  # Need to set inital values
-  # Set first row time=0.
-  for i in range(len(option_price_grid[0])):
-    option_price_grid[0][i] = start_price(strike_price, stock_price_array[i])
+  option_price_grid[0] = start_prices(strike_price, stock_price_array)
   # A matrix will have N-2 * N-2 elements. Of which only 3 * N-2 are populated
-  (A_dense, adjustment) = generate_black_scholes_matrix(
-      strike_price, price_intervals -2, k, sigma, r)
-  A = sparse_matrix.SparseMatrix(dense_matrix=A_dense)
+  A = sparse_matrix.SparseMatrix(dense_matrix=generate_black_scholes_matrix(
+      h - 1, k, sigma, r))
 
+  adjustment = generate_adjustment_term(strike_price, k, sigma, r)
   time_step = 1
-  while time_step < time_intervals:
+  while time_step < (timesteps + 1):
+    # Need to create a new list here to avoid Python list mutability.
     f_vector = option_price_grid[time_step - 1][:]
     # Need to adjust 1st element by adding adjustment term.
     f_vector[1] += adjustment
@@ -95,5 +118,39 @@ if __name__ == "__main__":
     option_price_grid[time_step] = (
         [strike_price] + sparse_sor_solver.get_solution().values + [0])
     time_step += 1
+  return option_price_grid
 
-  print(*zip(stock_price_array, option_price_grid[-1]))
+def run_black_scholes(
+    timesteps, strike_price, h ,k, sigma, r, stock_price_max):
+  """Runs the black scholes program.
+
+  Args:
+    timesteps: The integer number of timesteps to run for.
+    strike_price: The strike price of the option in question.
+    h: h the number of intervals into which the price is broken.
+    k: k the number of intervals into which each timestep is broken.
+    sigma: The standard deviation
+    r: The risk free rate.
+
+  Returns:
+    A dict mapping the stock price at time timestep to the option price.
+  Raises:
+    Exception if the passed k and h values are unstable.
+  """
+  if (k / h ** 2) >= 1 / 2:
+    raise Exception("k/h**2 needs to be less than 1/2 for stability")
+  print("Price intervals: %s\nTime_interval: %s days"
+        % (h + 1, timesteps))
+  stock_price_array = generate_stock_price_array(stock_price_max, h)
+  option_price_grid = generate_option_price_grid(
+      timesteps, strike_price, h, k, sigma, r, stock_price_array)
+  return {stock_price: option_price for stock_price, option_price in
+          zip(stock_price_array, option_price_grid[-1])}
+
+
+
+if __name__ == "__main__":
+  values = run_black_scholes(
+      timesteps, strike_price, h, k, sigma, r, stock_price_max)
+  for key, value in sorted(values.items()):
+    print("Stock price: %s, Option price: %s" % (key, value))
