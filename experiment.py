@@ -7,6 +7,14 @@ import vector
 import sparse_sor
 
 def experiment_EffectOfDifferentRelaxationRate(matrix, vector):
+  """Calculate resudual sum for a matrix with different relaxation rates.
+  
+  Args:
+    matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
+    vector: A vector.Vector
+    
+  Returns: List of sum of residuals for different relaxation rates.
+  """
   i = 1.0
   results = []
   while(i < 2.1):
@@ -16,7 +24,8 @@ def experiment_EffectOfDifferentRelaxationRate(matrix, vector):
             sparse_sor_solver))  
     i += 0.1
   return(results)
-    
+
+# Createa number of matrices and vectors to experiment with    
 matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
       [[7, 1, 0, 3, 0],
        [0, -7, 1, 0, 0],
