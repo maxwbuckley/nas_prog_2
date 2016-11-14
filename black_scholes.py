@@ -12,7 +12,7 @@ r = 0.02 # Risk free rate of return, per year.
 sigma = .2 # Daily standard deviation, per year.
 stock_price_max = 2.0 # dollars, Float.
 h = 200 # price sub intervals, Int.
-timesteps = 30 # days, Int.
+timesteps = 60 # days, Int.
 strike_price = 1.0 # Price at which we can sell our asset at time 0.
 
 k = 1/365 # scalar for  converting rates to relevant time period of days.
