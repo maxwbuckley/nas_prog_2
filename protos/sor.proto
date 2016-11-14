@@ -15,8 +15,8 @@ message SparseMatrix {
   uint64 row_count = 2;
   uint64 column_count = 3;
   // SparseMatrix can have any number of SparseValues.
-  // Client code will need to check for inconsistencies. 
-  repeated SparseValue values = 4; 
+  // Client code will need to check for inconsistencies.
+  repeated SparseValue values = 4;
 }
 
 message Vector {
@@ -38,5 +38,8 @@ message SorReturnValue {
     UNRECOVERABLE_EXCEPTION = 6;
   }
   StoppingReason stopping_reason = 3;
+
   Vector vector = 4;
+
+  uint64 stopping_iteration = 5;
 }

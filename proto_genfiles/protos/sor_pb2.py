@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='protos/sor.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x10protos/sor.proto\"E\n\x0bSparseValue\x12\x11\n\trow_index\x18\x01 \x01(\x04\x12\x14\n\x0c\x63olumn_index\x18\x02 \x01(\x04\x12\r\n\x05value\x18\x03 \x01(\x01\"j\n\x0cSparseMatrix\x12\x13\n\x0bmatrix_name\x18\x01 \x01(\t\x12\x11\n\trow_count\x18\x02 \x01(\x04\x12\x14\n\x0c\x63olumn_count\x18\x03 \x01(\x04\x12\x1c\n\x06values\x18\x04 \x03(\x0b\x32\x0c.SparseValue\"=\n\x06Vector\x12\x13\n\x0bvector_name\x18\x01 \x01(\t\x12\x0e\n\x06length\x18\x02 \x01(\x04\x12\x0e\n\x06values\x18\x03 \x03(\x01\"\xb7\x02\n\x0eSorReturnValue\x12\x13\n\x0bresult_name\x18\x01 \x01(\t\x12\x37\n\x0fstopping_reason\x18\x03 \x01(\x0e\x32\x1e.SorReturnValue.StoppingReason\x12\x17\n\x06vector\x18\x04 \x01(\x0b\x32\x07.Vector\"\xbd\x01\n\x0eStoppingReason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x1a\n\x16X_SEQUENCE_CONVERGENCE\x10\x01\x12\x18\n\x14RESIDUAL_CONVERGENCE\x10\x02\x12\x1a\n\x16MAX_ITERATIONS_REACHED\x10\x03\x12\x19\n\x15X_SEQUENCE_DIVERGENCE\x10\x04\x12\x14\n\x10ZERO_ON_DIAGONAL\x10\x05\x12\x1b\n\x17UNRECOVERABLE_EXCEPTION\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\n\x10protos/sor.proto\"E\n\x0bSparseValue\x12\x11\n\trow_index\x18\x01 \x01(\x04\x12\x14\n\x0c\x63olumn_index\x18\x02 \x01(\x04\x12\r\n\x05value\x18\x03 \x01(\x01\"j\n\x0cSparseMatrix\x12\x13\n\x0bmatrix_name\x18\x01 \x01(\t\x12\x11\n\trow_count\x18\x02 \x01(\x04\x12\x14\n\x0c\x63olumn_count\x18\x03 \x01(\x04\x12\x1c\n\x06values\x18\x04 \x03(\x0b\x32\x0c.SparseValue\"=\n\x06Vector\x12\x13\n\x0bvector_name\x18\x01 \x01(\t\x12\x0e\n\x06length\x18\x02 \x01(\x04\x12\x0e\n\x06values\x18\x03 \x03(\x01\"\xd3\x02\n\x0eSorReturnValue\x12\x13\n\x0bresult_name\x18\x01 \x01(\t\x12\x37\n\x0fstopping_reason\x18\x03 \x01(\x0e\x32\x1e.SorReturnValue.StoppingReason\x12\x17\n\x06vector\x18\x04 \x01(\x0b\x32\x07.Vector\x12\x1a\n\x12stopping_iteration\x18\x05 \x01(\x04\"\xbd\x01\n\x0eStoppingReason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x1a\n\x16X_SEQUENCE_CONVERGENCE\x10\x01\x12\x18\n\x14RESIDUAL_CONVERGENCE\x10\x02\x12\x1a\n\x16MAX_ITERATIONS_REACHED\x10\x03\x12\x19\n\x15X_SEQUENCE_DIVERGENCE\x10\x04\x12\x14\n\x10ZERO_ON_DIAGONAL\x10\x05\x12\x1b\n\x17UNRECOVERABLE_EXCEPTION\x10\x06\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -62,8 +62,8 @@ _SORRETURNVALUE_STOPPINGREASON = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=385,
-  serialized_end=574,
+  serialized_start=413,
+  serialized_end=602,
 )
 _sym_db.RegisterEnumDescriptor(_SORRETURNVALUE_STOPPINGREASON)
 
@@ -238,6 +238,13 @@ _SORRETURNVALUE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='stopping_iteration', full_name='SorReturnValue.stopping_iteration', index=3,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -252,7 +259,7 @@ _SORRETURNVALUE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=263,
-  serialized_end=574,
+  serialized_end=602,
 )
 
 _SPARSEMATRIX.fields_by_name['values'].message_type = _SPARSEVALUE

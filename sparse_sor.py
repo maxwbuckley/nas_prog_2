@@ -35,7 +35,7 @@ class SparseSorSolver(object):
     self.relaxation_rate = w
 
     self.machine_epsilon = 2 ** -52
-    self.sor_return_proto = sor_pb2.SorReturnValue()
+
     # Fill out
     self.iteration = 0
     self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
@@ -137,3 +137,10 @@ class SparseSorSolver(object):
       A vector.Vector of the solution x.
     """
     return vector.Vector(number_list = self.x)
+
+  def to_proto(self):
+    """Converts solution to proto for storage and transmission."""
+    return sor_pb2.SorReturnValue(
+        result_name="x", stopping_reason=self.stopping_reason,
+        vector=self.get_solution().to_proto(),
+        stopping_iteration=self.iteration)

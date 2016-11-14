@@ -31,20 +31,24 @@ class IoTest(unittest.TestCase):
         vector_name="b-", length=3)
     self.negative_vector_proto.values.extend([-1.0, -3.6, -9.1])
 
-  def testReadFile(self):
-    # TODO(rob): Complete
-    pass
+    self.input_file = 'testdata/io_test.in'
+    self.output_file = 'testdata/io_test.out'
+
+  def test_ReadFile(self):
+    file_contents = data_io._read_file(self.input_file)
+    self.assertTrue('matrix_name: "a"' in file_contents)
+    self.assertTrue('vector_name: "b"' in file_contents)
 
   def testReadInput(self):
-    filename = 'nas_Sor.in'
-    file_contents = data_io._read_file(filename)
-    a, b = data_io.read_input(filename)
+    file_contents = data_io._read_file(self.input_file)
+    a, b = data_io.read_input(self.input_file)
     expected = str(a) + '\n' + str(b) + '\n'
-    self.assertEqual(expected, file_contents)
+    self.assertEqual(file_contents, expected)
 
   def testWriteOutput(self):
-    # TODO(rob): Complete
-    pass
+    data_io.write_output(self.vector_proto, self.output_file)
+    file_contents =  data_io._read_file(self.output_file)
+    self.assertEqual(file_contents, str(self.vector_proto))
 
   def testProcessStringMatrixProto(self):
     matrix_proto_a = data_io._process_string_matrix_proto(
@@ -65,6 +69,7 @@ class IoTest(unittest.TestCase):
     negative_vector_proto = data_io._process_string_vector_proto(
         str(self.negative_vector_proto))
     self.assertEqual(negative_vector_proto, self.negative_vector_proto)
+
 
 if __name__ == '__main__':
   unittest.main()

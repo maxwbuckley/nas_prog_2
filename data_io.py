@@ -71,12 +71,18 @@ def _process_string_matrix_proto(string_matrix_proto):
   return sparse_matrix_proto
 
 
-def write_output(filename, output_message):
+def write_output(output_message, filename="nas_Sor.out"):
   """Writes output file
   Args:
     filename: The string filename.
-    output_message: A sor_pb2.SorReturnValue
+    output_message: A pb2.SorReturnValue proto message to be written to file
   Raises:
     IOError. If the file cannot be opened or written.
   """
-  pass
+  try:
+    file_obj = open(filename, 'w+')
+    file_obj.seek(0)
+    file_contents = file_obj.write(str(output_message))
+    file_obj.truncate()
+  finally:
+    file_obj.close()
