@@ -104,3 +104,9 @@ table3_with_index = table3.set_index('relaxation_rate')
 print(table1_with_index)
 print(table2_with_index)
 print(table3_with_index)
+
+# Experiment to see effect of setting relaxation rate to out of bound number
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_a, vector_b, 50, 10**-20, 20)
+
+print(sparse_sor_solver)
