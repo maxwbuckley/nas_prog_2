@@ -7,25 +7,6 @@ import vector
 import sparse_sor
 import pandas
 
-def experiment_EffectOfDifferentRelaxationRate(matrix, vector):
-  """Calculate resudual sum for a matrix with different relaxation rates.
-  
-  Args:
-    matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
-    vector: A vector.Vector
-    
-  Returns: List of sum of residuals for different relaxation rates.
-  """
-  i = 1.0
-  results = []
-  while(i < 2.1):
-    sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, 10, 10**-20, i)
-    results.append(sparse_sor.SparseSorSolver.compute_absolute_residual_sum(
-            sparse_sor_solver))  
-    i += 0.1
-  return(results)
-
 # Createa number of matrices and vectors to experiment with    
 matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
       [[7, 1, 0, 3, 0],
@@ -63,13 +44,63 @@ matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
 vector_f = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
+# Creat list of relaxation rates to act as indices                         
 index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
-experiment_a = experiment_EffectOfDifferentRelaxationRate(matrix_a, vector_b)
-experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_b, vector_d)
-experiment_c = experiment_EffectOfDifferentRelaxationRate(matrix_c, vector_f)
+                         
+def experiment_EffectOfDifferentRelaxationRate(matrix,
+                                               vector, relaxation_rate):
+  """Calculate resudual sum for a matrix with different relaxation rates.
+  
+  Args:
+    matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
+    vector: A vector.Vector
+    
+  Returns: List of sum of residuals for different relaxation rates.
+  """
+  i = 1.0
+  results = []
+  while(i < 2.1):
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix, vector, relaxation_rate, 10**-20, i)
+    results.append(sparse_sor.SparseSorSolver.compute_absolute_residual_sum(
+            sparse_sor_solver))  
+    i += 0.1
+  return(results)
 
-table = pandas.DataFrame({'relaxation_rate':index_list,'matrix_a':experiment_a,
-                          'matrix_b':experiment_b,'matrix_c':experiment_c})
-table_with_relaxation_rate_as_index = table.set_index('relaxation_rate')
+experiment_a = experiment_EffectOfDifferentRelaxationRate(matrix_a, 
+                                                          vector_b, 10)
+experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_b, 
+                                                          vector_d, 10)
+experiment_c = experiment_EffectOfDifferentRelaxationRate(matrix_c, 
+                                                          vector_f, 10)
+experiment_d = experiment_EffectOfDifferentRelaxationRate(matrix_a, 
+                                                          vector_b, 5)
+experiment_e = experiment_EffectOfDifferentRelaxationRate(matrix_b, 
+                                                          vector_d, 5)
+experiment_f = experiment_EffectOfDifferentRelaxationRate(matrix_c, 
+                                                          vector_f, 5)
+experiment_g = experiment_EffectOfDifferentRelaxationRate(matrix_a, 
+                                                          vector_b, 20)
+experiment_h = experiment_EffectOfDifferentRelaxationRate(matrix_b, 
+                                                          vector_d, 20)
+experiment_i = experiment_EffectOfDifferentRelaxationRate(matrix_c, 
+                                                          vector_f, 20)
 
-print(table_with_relaxation_rate_as_index)
+table1 = pandas.DataFrame({'relaxation_rate':index_list,
+                           'matrix_a':experiment_a,'matrix_b':experiment_b,
+                           'matrix_c':experiment_c})
+table2 = pandas.DataFrame({'relaxation_rate':index_list,
+                           'matrix_a':experiment_d,'matrix_b':experiment_e,
+                           'matrix_c':experiment_f})
+table3 = pandas.DataFrame({'relaxation_rate':index_list,
+                           'matrix_a':experiment_g,'matrix_b':experiment_h,
+                           'matrix_c':experiment_i})
+
+table1_with_index = table1.set_index('relaxation_rate')
+table2_with_index = table2.set_index('relaxation_rate')
+table3_with_index = table3.set_index('relaxation_rate')
+
+# Print results to be added to assignment doc
+print(table1_with_index)
+print(table2_with_index)
+print(table3_with_index)
