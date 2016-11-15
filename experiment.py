@@ -110,3 +110,87 @@ sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 50, 10**-20, 20)
 
 print(sparse_sor_solver)
+
+""" Black-Scholes with Google stock options """
+
+""" Option 1 """
+
+r = 0.54
+sigma = 35
+stock_price_max = 835.74
+h = 83574
+timesteps = 7
+strike_price = 730
+
+k = 1/365
+
+def start_prices(strike_price, stock_prices_time_0):
+  return [max(strike_price - stock_price, 0) for
+          stock_price in stock_prices_time_0]
+
+
+def generate_black_scholes_matrix(N, k, sigma, r):
+  grid =[[0 for _ in range(N)] for _ in range(N)]
+  for i in range(N):
+    n = i + 1
+    if i > 0:
+      # Append previous row
+      grid[i][i-1] = -((n * k) / 2) * (n * sigma ** 2 - r)
+    # Append current row
+    grid[i][i] = 1 + (k * r) + (k * (sigma ** 2) * (n ** 2))
+    if i < N - 1:
+      # Append final element
+      grid[i][i + 1] =  -((n * k) / 2) * (n * (sigma ** 2) + r)
+  return grid
+
+
+def generate_adjustment_term(strike_price, k, sigma, r):
+  return ((k / 2) * (sigma ** 2 - r) * strike_price)
+
+def generate_stock_price_array(stock_price_max, h):
+  return [stock_price_max * (price / h) for price in range(
+          h + 1)]
+
+def generate_option_price_grid(
+    timesteps, strike_price, h, k, sigma, r, stock_price_array):
+  option_price_grid =[[None for _ in range(h + 1)] for _ in range(
+      timesteps + 1)]
+  # row is across prices columns are over time
+  option_price_grid[0] = start_prices(strike_price, stock_price_array)
+  # A matrix will have N-2 * N-2 elements. Of which only 3 * N-2 are populated
+  A = sparse_matrix.SparseMatrix(dense_matrix=generate_black_scholes_matrix(
+      h - 1, k, sigma, r))
+
+  adjustment = generate_adjustment_term(strike_price, k, sigma, r)
+  time_step = 1
+  while time_step < (timesteps + 1):
+    # Need to create a new list here to avoid Python list mutability.
+    f_vector = option_price_grid[time_step - 1][:]
+    # Need to adjust 1st element by adding adjustment term.
+    f_vector[1] += adjustment
+    f = vector.Vector(number_list=f_vector[1:-1])
+    sparse_sor_solver = sparse_sor.SparseSorSolver(A, f, 100, .0001, 1.0)
+    option_price_grid[time_step] = (
+        [strike_price] + sparse_sor_solver.get_solution().values + [0])
+    time_step += 1
+  return option_price_grid
+
+def run_black_scholes(
+    timesteps, strike_price, h ,k, sigma, r, stock_price_max):
+  if (k / h ** 2) >= 1 / 2:
+    raise Exception("k/h**2 needs to be less than 1/2 for stability")
+  print("Price intervals: %s\nTime_interval: %s days"
+        % (h + 1, timesteps))
+  stock_price_array = generate_stock_price_array(stock_price_max, h)
+  option_price_grid = generate_option_price_grid(
+      timesteps, strike_price, h, k, sigma, r, stock_price_array)
+  return {stock_price: option_price for stock_price, option_price in
+          zip(stock_price_array, option_price_grid[-1])}
+
+
+
+if __name__ == "__main__":
+  values = run_black_scholes(
+      timesteps, strike_price, h, k, sigma, r, stock_price_max)
+  for key, value in sorted(values.items()):
+    print("Stock price: %s, Option price: %s" % (key, value))
