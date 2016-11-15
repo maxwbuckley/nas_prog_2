@@ -5,6 +5,7 @@
 import sparse_matrix
 import vector
 import sparse_sor
+import pandas
 
 def experiment_EffectOfDifferentRelaxationRate(matrix, vector):
   """Calculate resudual sum for a matrix with different relaxation rates.
@@ -35,7 +36,7 @@ matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
   
 vector_b = vector.Vector(name = "b", number_list = [1, 1, 2, 2, 3])
 
-matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
+matrix_b = sparse_matrix.SparseMatrix(dense_matrix=
       [[15, 1, 0, 0, 0, 4, 0, 0, 1, 0],
        [0, -14, 1, 0, 0, 3, 0, 0, 1, 2],
        [1, 0, 21, 0, 1, 0, 3, 2, 0, 0],
@@ -50,7 +51,7 @@ matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
 vector_d = vector.Vector(name = "d",
                          number_list = [3, 4, 3, 2, 3, 1, 5, 3, 1, 2])
                          
-matrix_e = sparse_matrix.SparseMatrix(dense_matrix=
+matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
       [[15, 1, 0, 3, 0, 4, 0],
        [0, -14, 0, 0, 0, 3, 0],
        [1, 0, 21, 0, 1, 0, 3],
@@ -62,6 +63,13 @@ matrix_e = sparse_matrix.SparseMatrix(dense_matrix=
 vector_f = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
+index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
 experiment_a = experiment_EffectOfDifferentRelaxationRate(matrix_a, vector_b)
-experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_c, vector_d)
-experiment_c = experiment_EffectOfDifferentRelaxationRate(matrix_e, vector_f)
+experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_b, vector_d)
+experiment_c = experiment_EffectOfDifferentRelaxationRate(matrix_c, vector_f)
+
+table = pandas.DataFrame({'relaxation_rate':index_list,'matrix_a':experiment_a,
+                          'matrix_b':experiment_b,'matrix_c':experiment_c})
+table_with_relaxation_rate_as_index = table.set_index('relaxation_rate')
+
+print(table_with_relaxation_rate_as_index)
