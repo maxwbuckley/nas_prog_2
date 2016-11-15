@@ -96,6 +96,7 @@ class SparseSorSolver(object):
     """Calculate the absolute difference between the current x and last x."""
     x_diff_sum = 0
     for i in range(len(self.x)):
+      self.total_old = x_diff_sum
       x_diff_sum += abs(self.x[i] - self.x_old[i])
     return x_diff_sum
 
