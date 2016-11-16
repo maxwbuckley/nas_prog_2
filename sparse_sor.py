@@ -10,7 +10,6 @@ class SorSolverInputException(Exception):
 class SparseSorSolver(object):
   def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0):
     """Initialize Sparse SOR Solver
-
     Args:
       matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
       vector: A vector.Vector
@@ -105,9 +104,7 @@ class SparseSorSolver(object):
 
   def is_converged(self):
     """Performs a series of convergence checks.
-
     Updates the self.stopping_reason variable if necessary
-
     Returns:
       boolean whether we should stop.
     """
@@ -134,7 +131,6 @@ class SparseSorSolver(object):
 
   def get_solution(self):
     """Returns the solution vector x.
-
     Returns:
       A vector.Vector of the solution x.
     """
