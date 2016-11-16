@@ -7,7 +7,7 @@ import vector
 import sparse_sor
 import pandas
 
-# Createa number of matrices and vectors to experiment with    
+# Create a number of matrices and vectors to experiment with    
 matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
       [[7, 1, 0, 3, 0],
        [0, -7, 1, 0, 0],
@@ -48,12 +48,13 @@ vector_f = vector.Vector(name = "f",
 index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
                          
 def experiment_EffectOfDifferentRelaxationRate(matrix,
-                                               vector, relaxation_rate):
-  """Calculate resudual sum for a matrix with different relaxation rates.
+                                               vector, maxits):
+  """Calculate residual sum for a matrix with different relaxation rates.
   
   Args:
     matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
     vector: A vector.Vector
+    maxits: Max number of iterations
     
   Returns: List of sum of residuals for different relaxation rates.
   """
@@ -61,7 +62,7 @@ def experiment_EffectOfDifferentRelaxationRate(matrix,
   results = []
   while(i < 2.1):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, relaxation_rate, 10**-20, i)
+        matrix, vector, maxits, 10**-20, i)
     results.append(sparse_sor.SparseSorSolver.compute_absolute_residual_sum(
             sparse_sor_solver))  
     i += 0.1
@@ -105,11 +106,19 @@ print(table1_with_index)
 print(table2_with_index)
 print(table3_with_index)
 
-# Experiment to see effect of setting relaxation rate to out of bound number
-sparse_sor_solver = sparse_sor.SparseSorSolver(
+# Experiment to see effect of setting relaxation rate to out of bounds number
+sparse_sor_solver_a = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 50, 10**-20, 20)
+        
+sparse_sor_solver_b = sparse_sor.SparseSorSolver(
+        matrix_b, vector_d, 50, 10**-20, 20)
+        
+sparse_sor_solver_c = sparse_sor.SparseSorSolver(
+        matrix_c, vector_f, 50, 10**-20, 20)
 
-print(sparse_sor_solver)
+print(sparse_sor_solver_a)
+print(sparse_sor_solver_b)
+print(sparse_sor_solver_c)
 
 """ Black-Scholes with Google stock options """
 
@@ -123,3 +132,45 @@ timesteps = 7
 strike_price = 730
 
 k = 1/365
+
+# Experiment to see effect of ill-conditioned matrix on sparse_sor
+
+matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
+      [[1.01, 1],
+       [1, 1.01]])
+       
+vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        50, 10**-20, 1.0)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        50, 10**-20, 1.2)
+        
+print(sparse_sor_solver)
+
+# Experiment to see effect of different levels of tolerance
+
+def experiment_EffectOfDifferentTolerance(matrix, vector):
+  """Calculate residual sum for a matrix with different relaxation rates.
+  
+  Args:
+    matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
+    vector: A vector.Vector
+    
+  Returns: List of sum of residuals for different relaxation rates.
+  """
+  i = -1
+  while(i > -22):
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix, vector, 50, 10**i, 1.0)
+    print(sparse_sor_solver)
+    i -= 4
+    
+experiment_EffectOfDifferentTolerance(matrix_a, vector_b)
+experiment_EffectOfDifferentTolerance(matrix_b, vector_d)
+experiment_EffectOfDifferentTolerance(matrix_c, vector_f)
