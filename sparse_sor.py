@@ -10,6 +10,7 @@ class SorSolverInputException(Exception):
 class SparseSorSolver(object):
   def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0):
     """Initialize Sparse SOR Solver
+
     Args:
       matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
       vector: A vector.Vector
@@ -44,7 +45,7 @@ class SparseSorSolver(object):
     self.sparse_sor()
 
   def __repr__(self):
-    """Change print format"""
+    """Change default object print format"""
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
@@ -53,7 +54,6 @@ class SparseSorSolver(object):
         Computed vector x: %(OUTPUT_X)s
         Sum of absolute residual: %(RESIDUAL)s
         """
-
     return print_template % {
         "MATRIX_A": self.A,
         "VECTOR_B": self.b,
@@ -65,6 +65,7 @@ class SparseSorSolver(object):
 
   def sparse_sor(self):
     """Compute the sparse sor solution for Ax = b.
+
     Returns:
       A list of numeric values and a termination reason.
     """
@@ -84,7 +85,11 @@ class SparseSorSolver(object):
           sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
   def compute_absolute_residual_sum(self):
-    """Computes the sum of the absolute deviations from Ax from b"""
+    """Computes the sum of the absolute deviations from Ax from b.
+
+    Returns:
+      A float the total of the absolute residuals.
+    """
     estimate = self.A.multiply_by_vector(vector.Vector(number_list=self.x))
     residual_total = 0
     for i in range(len(estimate)):
