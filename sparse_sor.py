@@ -128,6 +128,8 @@ class SparseSorSolver(object):
       self.stopping_reason = (
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
+    # Update old X total.
+    self.total_old = x_total
     return False
 
   def get_solution(self):

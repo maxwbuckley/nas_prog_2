@@ -42,6 +42,33 @@ class SparseSorSolverTest(unittest.TestCase):
         matrix_a, vector_b, 10, 10**-20, 1.0)
     print(sparse_sor_solver)
 
+  def testSparseSorSolver_ClassExample(self):
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
+        [[7, 1, 0],
+         [1, -7, 1],
+         [0, 1, 8]])
+
+    vector_b = vector.Vector(name="b", number_list=[1, 1, 1])
+
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_a, vector_b, 10, 10**-20, 1.2)
+    self.assertEqual(sparse_sor_solver.stopping_reason,
+                     sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
+
+  def testSparseSorSolver_DivergenceExample(self):
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
+        [[3, -1, 1],
+         [-1, 3, -1],
+         [1, -1, 3]])
+
+    vector_b = vector.Vector(name="b", number_list=[-1, 7, -7])
+
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_a, vector_b, 10, .0001, 31.0)
+
+    self.assertEqual(sparse_sor_solver.stopping_reason,
+                     sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
+
   def testSparseSorSolver_SolvedExample(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[3, -1, 1],
