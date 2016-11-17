@@ -156,11 +156,14 @@ class SparseMatrix(object):
     """Multiply this matrix by the target vector
 
       Args:
-        vector:
+        vector_object: A vector.Vector object.i
+
       Returns:
-        a vector.
-      Raises NonConformableException if the matrix and vector are non
-          conformable.
+        a list of numbers.
+
+      Raises:
+        NonConformableException if the matrix and vector are non
+            conformable.
     """
     if not isinstance(vector_object, vector.Vector):
       raise Exception("Can only multiply by a vector")

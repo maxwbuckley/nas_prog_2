@@ -46,7 +46,7 @@ class SparseSorSolver(object):
     self.sparse_sor()
 
   def __repr__(self):
-    """Change print format"""
+    """Change default object print format"""
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
@@ -55,7 +55,6 @@ class SparseSorSolver(object):
         Computed vector x: %(OUTPUT_X)s
         Sum of absolute residual: %(RESIDUAL)s
         """
-
     return print_template % {
         "MATRIX_A": self.A,
         "VECTOR_B": self.b,
@@ -67,26 +66,34 @@ class SparseSorSolver(object):
 
   def sparse_sor(self):
     """Compute the sparse sor solution for Ax = b.
+
     Returns:
       A list of numeric values and a termination reason.
     """
     while not self.is_converged() and self.iteration < self.maxits:
       self.x_old = self.x[:]
       for i in range(self.b.length):
+      # This needs revision see chapter 4 slide 92.
         sum = 0
         for j in range(self.A.rowStart[i], self.A.rowStart[i + 1]):
-          sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
-          if self.A.cols[j] == i:
+          if self.A.cols[j] != i:
+            sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
+          else:
             d = self.A.vals[j]
         self.x[i] = (
-            self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
+            self.x[i] + self.relaxation_rate * (
+                (self.b.values[i] - sum) / d - self.x[i]))
       self.iteration += 1
     if self.iteration >= self.maxits:
       self.stopping_reason = (
           sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
   def compute_absolute_residual_sum(self):
-    """Computes the sum of the absolute deviations from Ax from b"""
+    """Compute the sum of the absolute deviations from Ax from b.
+
+    Returns:
+      A float the total of the absolute residuals.
+    """
     estimate = self.A.multiply_by_vector(vector.Vector(number_list=self.x))
     residual_total = 0
     for i in range(len(estimate)):
@@ -129,11 +136,12 @@ class SparseSorSolver(object):
       self.stopping_reason = (
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
+    # Update old X total.
+    self.total_old = x_total
     return False
 
   def get_solution(self):
     """Returns the solution vector x.
-
     Returns:
       A vector.Vector of the solution x.
     """
