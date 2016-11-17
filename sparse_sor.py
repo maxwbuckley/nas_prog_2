@@ -75,11 +75,12 @@ class SparseSorSolver(object):
       # This needs revision see chapter 4 slide 92.
         sum = 0
         for j in range(self.A.rowStart[i], self.A.rowStart[i + 1]):
-          sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
-          if self.A.cols[j] == i:
+          if self.A.cols[j] != i:
+            sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
+          else:
             d = self.A.vals[j]
         self.x[i] = (
-            self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
+             (1- self.relaxation_rate) *self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
       self.iteration += 1
     if self.iteration >= self.maxits:
       self.stopping_reason = (

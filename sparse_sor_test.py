@@ -6,7 +6,7 @@ import sparse_matrix
 from proto_genfiles.protos import sor_pb2
 import unittest
 
-def almost_equal(value_1, value_2, accuracy = 10**-4):
+def almost_equal(value_1, value_2, accuracy = 10**-2):
   return abs(value_1 - value_2) < accuracy
 
 class SparseSorSolverTest(unittest.TestCase):
@@ -30,7 +30,7 @@ class SparseSorSolverTest(unittest.TestCase):
         matrix_a, vector_b, 10, .0001, 1.0)
     print(sparse_sor_solver)
 
-  def testSparseSorSolver_ClassExample(self):
+  def testSparseSorSolver_ClassExample1(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[7, 1, 0],
          [1, -7, 1],
@@ -42,7 +42,7 @@ class SparseSorSolverTest(unittest.TestCase):
         matrix_a, vector_b, 10, 10**-20, 1.0)
     print(sparse_sor_solver)
 
-  def testSparseSorSolver_ClassExample(self):
+  def testSparseSorSolver_ClassExample2(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[7, 1, 0],
          [1, -7, 1],
@@ -55,7 +55,7 @@ class SparseSorSolverTest(unittest.TestCase):
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
-  def testSparseSorSolver_DivergenceExample(self):
+  def testSparseSorSolver_DivergenceExampleHighRelaxationRate(self):
     matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
         [[3, -1, 1],
          [-1, 3, -1],
@@ -64,7 +64,7 @@ class SparseSorSolverTest(unittest.TestCase):
     vector_b = vector.Vector(name="b", number_list=[-1, 7, -7])
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_a, vector_b, 10, .0001, 31.0)
+        matrix_a, vector_b, 10, .0001, 30.0)
 
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
