@@ -72,6 +72,7 @@ class SparseSorSolver(object):
     while not self.is_converged() and self.iteration < self.maxits:
       self.x_old = self.x[:]
       for i in range(self.b.length):
+      # This needs revision see chapter 4 slide 92.
         sum = 0
         for j in range(self.A.rowStart[i], self.A.rowStart[i + 1]):
           sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
@@ -85,7 +86,7 @@ class SparseSorSolver(object):
           sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
   def compute_absolute_residual_sum(self):
-    """Computes the sum of the absolute deviations from Ax from b.
+    """Compute the sum of the absolute deviations from Ax from b.
 
     Returns:
       A float the total of the absolute residuals.
@@ -109,7 +110,9 @@ class SparseSorSolver(object):
 
   def is_converged(self):
     """Performs a series of convergence checks.
+
     Updates the self.stopping_reason variable if necessary
+
     Returns:
       boolean whether we should stop.
     """
