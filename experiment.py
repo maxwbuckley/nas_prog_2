@@ -6,6 +6,8 @@ import sparse_matrix
 import vector
 import sparse_sor
 import pandas
+from proto_genfiles.protos import sor_pb2
+import random
 
 # Create a number of matrices and vectors to experiment with    
 matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
@@ -44,7 +46,7 @@ matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
 vector_f = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
-# Creat list of relaxation rates to act as indices                         
+# Create list of relaxation rates to act as indices                         
 index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
                          
 def experiment_EffectOfDifferentRelaxationRate(matrix,
@@ -62,9 +64,9 @@ def experiment_EffectOfDifferentRelaxationRate(matrix,
   results = []
   while(i < 2.1):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, maxits, 10**-20, i)
-    results.append(sparse_sor.SparseSorSolver.compute_absolute_residual_sum(
-            sparse_sor_solver))  
+        matrix, vector, maxits, 2**-10, i)
+    results.append(sparse_sor_solver.iteration
+            )  
     i += 0.1
   return(results)
 
@@ -128,7 +130,8 @@ r = 0.54
 sigma = 35
 stock_price_max = 835.74
 h = 83574
-timesteps = 7
+timesteps = 7 # Days
+m = 28 # TIme sub intervals
 strike_price = 730
 
 k = 1/365
@@ -144,6 +147,12 @@ vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
 sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_ill_conditioned, vector_ill_conditioned,
         50, 10**-20, 1.0)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        50, 10**-20, 1.1)
         
 print(sparse_sor_solver)
 
@@ -174,3 +183,38 @@ def experiment_EffectOfDifferentTolerance(matrix, vector):
 experiment_EffectOfDifferentTolerance(matrix_a, vector_b)
 experiment_EffectOfDifferentTolerance(matrix_b, vector_d)
 experiment_EffectOfDifferentTolerance(matrix_c, vector_f)
+
+# Experiment to see effect of very large matrix
+
+# Create tridiagonal matrix
+matrix_a_proto = sor_pb2.SparseMatrix(
+    matrix_name="a", row_count=5000, column_count=5000)
+for i in range(0, 5000):
+  value = matrix_a_proto.values.add()
+  value.row_index = i
+  value.column_index = i
+  value.value = random.randint(10,15)
+for i in range(1, 5000):
+  value = matrix_a_proto.values.add()
+  value.row_index = i
+  value.column_index = i-1
+  value.value = random.randint(2,4)
+for i in range(0, 4999):
+  value = matrix_a_proto.values.add()
+  value.row_index = i
+  value.column_index = i+1
+  value.value = random.randint(-4,4)
+  
+matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
+
+# Create vector with 5000 entries
+vector_a_list = []
+for i in range(5000):
+  vector_a_list.append(random.randint(10,20))
+
+vector_a = vector.Vector(name = "a", number_list = vector_a_list)
+
+large_matrix_sor = sparse_sor.SparseSorSolver(matrix_a, vector_a, 100, 
+                                              2**-20, 1.0)
+#\\print(large_matrix_sor)                                              
+print(large_matrix_sor.iteration, large_matrix_sor.stopping_reason)
