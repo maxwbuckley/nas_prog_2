@@ -21,13 +21,14 @@ class SparseSorSolver(object):
     # Need to perform checks here.
     if not matrix.is_strictly_row_diagonally_dominant():
       # This is also checking for zero on diagonal.
-      raise SorSolverInputException("Input matrix is not strictly diagonally "
-                                    "dominant.")
+      print("warning input matrix is not strictly diagonally dominant. "
+            "Convergence may not occur")
     if not matrix.rows == vector.length:
       print("Matrix rows: %s" % matrix.rows)
       print("Vector length: %s" % vector.length)
-      raise Exception("Lengths are not conformable Ax = b hence rows in A "
-                      "must equal rows in b")
+      raise SorSolverInputException(
+          "Lengths are not conformable Ax = b hence number of rows in A must "
+          "equal number of rows in b")
     self.A = matrix
     self.b = vector
     self.maxits = maxits
