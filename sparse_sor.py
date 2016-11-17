@@ -80,7 +80,8 @@ class SparseSorSolver(object):
           else:
             d = self.A.vals[j]
         self.x[i] = (
-             (1- self.relaxation_rate) *self.x[i] + self.relaxation_rate * (self.b.values[i] - sum) / d)
+            self.x[i] + self.relaxation_rate * (
+                (self.b.values[i] - sum) / d - self.x[i]))
       self.iteration += 1
     if self.iteration >= self.maxits:
       self.stopping_reason = (
