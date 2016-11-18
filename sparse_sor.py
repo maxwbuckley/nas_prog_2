@@ -44,7 +44,8 @@ class SparseSorSolver(object):
     self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
     self.x = [0] * self.b.length
     self.x_old = None
-    self.total_old = [float("inf")]
+    self.total_old = float("inf")
+    self.x_growth_count = 0
     self.sparse_sor()
 
   def __repr__(self):
@@ -125,16 +126,6 @@ class SparseSorSolver(object):
     """Calculate the stopping threshold for a given value."""
     return self.tolerance + 4.0 * self.machine_epsilon * abs(value)
 
-  def is_x_diverging(self):
-    counter = 0
-    last = self.total_old[0]
-    for elem in self.total_old:
-      if elem >= last:
-        counter += 1
-      else:
-        counter = 0
-      last = elem
-    return counter > 10
   def is_converged(self):
     """Performs a series of convergence checks.
 
@@ -148,11 +139,15 @@ class SparseSorSolver(object):
     x_total = self.compute_absolute_x_sequence_difference_sum()
     if self.debug:
       print("x_total = %s, x_old = %s" % (x_total, self.total_old))
-    if x_total > self.total_old[-1]:
-      if self.is_x_diverging():
+    if x_total > self.total_old:
+      self.x_growth_count += 1
+      if self.x_growth_count > 5:
         self.stopping_reason = (
             sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
         return True
+    else:
+      self.x_growth_count = 0
+
     x_threshold = self.calculate_stopping_threshold(x_total)
     if x_total <= x_threshold:
       self.stopping_reason = (
@@ -164,7 +159,7 @@ class SparseSorSolver(object):
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
     # Update old X total.
-    self.total_old.append(x_total)
+    self.total_old = x_total
     return False
 
   def get_solution(self):
