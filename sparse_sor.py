@@ -8,7 +8,7 @@ class SorSolverInputException(Exception):
   """An exception for when the inputs are not compatible."""
 
 class SparseSorSolver(object):
-  def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0):
+  def __init__(self, matrix, vector, maxits=10, e=.01, w=1.0, debug=False):
     """Initialize Sparse SOR Solver
 
     Args:
@@ -17,11 +17,13 @@ class SparseSorSolver(object):
       maxits: The maximum number of iterations to run before stopping.
       e: float tolerance.
       w: float relaxation rate.
+      debug: boolean whether to print extra useful debugging messages.
     """
+    self.debug = debug
     # Need to perform checks here.
     if not matrix.is_strictly_row_diagonally_dominant():
       # This is also checking for zero on diagonal.
-      print("warning input matrix is not strictly diagonally dominant. "
+      print("Warning input matrix is not strictly diagonally dominant. "
             "Convergence may not occur")
     if not matrix.rows == vector.length:
       print("Matrix rows: %s" % matrix.rows)
@@ -42,7 +44,7 @@ class SparseSorSolver(object):
     self.stopping_reason = sor_pb2.SorReturnValue.UNKNOWN
     self.x = [0] * self.b.length
     self.x_old = None
-    self.total_old = float("inf")
+    self.total_old = [float("inf")]
     self.sparse_sor()
 
   def __repr__(self):
@@ -50,6 +52,7 @@ class SparseSorSolver(object):
     print_template = """
         Input Matrix A:\n%(MATRIX_A)s
         Input Vector b: %(VECTOR_B)s
+        Relaxation rate: %(RELAXATION_RATE)s
         Stopping reason: %(STOP_REASON)s
         Stopping iteration: %(ITERATION)s
         Computed vector x: %(OUTPUT_X)s
@@ -60,6 +63,7 @@ class SparseSorSolver(object):
         "VECTOR_B": self.b,
         "STOP_REASON":
             sor_pb2.SorReturnValue.StoppingReason.Name(self.stopping_reason),
+        "RELAXATION_RATE": self.relaxation_rate,
         "ITERATION": self.iteration,
         "OUTPUT_X": self.x,
         "RESIDUAL": self.compute_absolute_residual_sum()}
@@ -73,16 +77,26 @@ class SparseSorSolver(object):
     while not self.is_converged() and self.iteration < self.maxits:
       self.x_old = self.x[:]
       for i in range(self.b.length):
-      # This needs revision see chapter 4 slide 92.
+        # This needs revision see chapter 4 slide 92.
         sum = 0
+        d = 0
         for j in range(self.A.rowStart[i], self.A.rowStart[i + 1]):
           if self.A.cols[j] != i:
             sum = sum + self.A.vals[j] * self.x[self.A.cols[j]]
           else:
             d = self.A.vals[j]
-        self.x[i] = (
-            self.x[i] + self.relaxation_rate * (
-                (self.b.values[i] - sum) / d - self.x[i]))
+        try:
+          adjustment = self.relaxation_rate * (
+                    (self.b.values[i] - sum) / d - self.x[i])
+        except ZeroDivisionError:
+          print("Error Zero on diagonal. Computation terminated.")
+          self.stopping_reason = (
+            sor_pb2.SorReturnValue.ZERO_ON_DIAGONAL)
+          return
+        if self.debug:
+          print ("row = %s, x = %s, b = %s, sum = %s, d = %s adjustment = %s" %
+                 (i, self.x[i], self.b.values[i], sum, d, adjustment))
+        self.x[i] = (self.x[i] + adjustment)
       self.iteration += 1
     if self.iteration >= self.maxits:
       self.stopping_reason = (
@@ -111,6 +125,16 @@ class SparseSorSolver(object):
     """Calculate the stopping threshold for a given value."""
     return self.tolerance + 4.0 * self.machine_epsilon * abs(value)
 
+  def is_x_diverging(self):
+    counter = 0
+    last = self.total_old[0]
+    for elem in self.total_old:
+      if elem >= last:
+        counter += 1
+      else:
+        counter = 0
+      last = elem
+    return counter > 10
   def is_converged(self):
     """Performs a series of convergence checks.
 
@@ -122,10 +146,13 @@ class SparseSorSolver(object):
     if self.x_old is None:
       return False
     x_total = self.compute_absolute_x_sequence_difference_sum()
-    if x_total > self.total_old:
-      self.stopping_reason = (
-          sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
-      return True
+    if self.debug:
+      print("x_total = %s, x_old = %s" % (x_total, self.total_old))
+    if x_total > self.total_old[-1]:
+      if self.is_x_diverging():
+        self.stopping_reason = (
+            sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
+        return True
     x_threshold = self.calculate_stopping_threshold(x_total)
     if x_total <= x_threshold:
       self.stopping_reason = (
@@ -137,7 +164,7 @@ class SparseSorSolver(object):
           sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
       return True
     # Update old X total.
-    self.total_old = x_total
+    self.total_old.append(x_total)
     return False
 
   def get_solution(self):
