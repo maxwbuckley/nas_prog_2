@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/python3 
 """This script is to experiment with different parameters on different parts
    of our program."""
 
@@ -58,6 +58,7 @@ vector_f = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
 # Create list of relaxation rates to act as indices
+index_list = [ x / 10 for x in range(10,21)]
 index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
 
 def experiment_EffectOfDifferentRelaxationRate(
@@ -84,6 +85,10 @@ def experiment_EffectOfDifferentRelaxationRate(
 positive_def = experiment_EffectOfDifferentRelaxationRate(
   positive_definite_symmetric, vector_b_3, 50)
 
+matrices = [matrix_a, matrix_b, matrix_c]
+vectors = [vector_a, vector_b, vector_c]
+maxits = [5, 10]
+results = { (matrix_name, vector_name, maxits) : result }
 experiment_a = experiment_EffectOfDifferentRelaxationRate(matrix_a,
                                                           vector_b, 10)
 experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_b,
@@ -104,24 +109,28 @@ experiment_i = experiment_EffectOfDifferentRelaxationRate(matrix_c,
                                                           vector_f, 20)
 
 # TODO (rob) Look here at positive def results.
+table1 = pandas.DataFrame({
+                           'matrix_a': positive_def
+                           })
+"""
 table1 = pandas.DataFrame({'relaxation_rate':index_list,
                            'matrix_a': positive_def,'matrix_b':experiment_b,
                            'matrix_c':experiment_c})
 table2 = pandas.DataFrame({'relaxation_rate':index_list,
                            'matrix_a':experiment_d,'matrix_b':experiment_e,
-                           'matrix_c':experiment_f})
+                           'matrix_c':experiment_f}).set_index('relaxation_rate')
+
 table3 = pandas.DataFrame({'relaxation_rate':index_list,
                            'matrix_a':experiment_g,'matrix_b':experiment_h,
                            'matrix_c':experiment_i})
 
-table1_with_index = table1.set_index('relaxation_rate')
-table2_with_index = table2.set_index('relaxation_rate')
+#table1_with_index = table1.set_index('relaxation_rate')
 table3_with_index = table3.set_index('relaxation_rate')
-
+"""
 # Print results to be added to assignment doc
-print(table1_with_index)
-print(table2_with_index)
-print(table3_with_index)
+print(table1)
+#print(table2)
+#print(table3_with_index)
 
 # Experiment to see effect of setting relaxation rate to out of bounds number
 sparse_sor_solver_a = sparse_sor.SparseSorSolver(

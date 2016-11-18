@@ -167,7 +167,7 @@ class SparseSorSolver(object):
     Returns:
       A vector.Vector of the solution x.
     """
-    return vector.Vector(number_list = self.x)
+    return vector.Vector(name = 'x', number_list = self.x)
 
   def to_proto(self):
     """Converts solution to proto for storage and transmission."""

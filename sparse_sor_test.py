@@ -40,52 +40,50 @@ class SparseSorSolverTest(unittest.TestCase):
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 10, .0001, 1.0)
-    print(sparse_sor_solver)
+    
+    self.assertEqual(sparse_sor_solver.stopping_reason,
+                     sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
 
   # Class example with differing levels of relaxation
   def testSparseSorSolver_ClassExampleRelaxationNormal(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         self.matrix_a, self.vector_b, 10, 10**-20, 1.0)
-    print(sparse_sor_solver)
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
   def testSparseSorSolver_ClassExampleRelaxationHigh(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         self.matrix_a, self.vector_b, 10, 10**-20, 1.5)
-    print(sparse_sor_solver)
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
 
   def testSparseSorSolver_ClassExample2RelaxationVeryHigh(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        self.matrix_a, self.vector_b, 50, 10**-20, 1.9, True)
-    print(sparse_sor_solver)
+        self.matrix_a, self.vector_b, 50, 10**-20, 1.9)
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.X_SEQUENCE_DIVERGENCE)
 
   # Positive definite symmetric example with differing levels of relaxation
   def testSparseSorSolver_PositiveDefiniteRelaxationNormal(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        self.positive_definite_symmetric, self.vector_b, 25, 10**-20, 1.0, True)
+        self.positive_definite_symmetric, self.vector_b, 250, 10**-20, 1.0)
     print(sparse_sor_solver)
     self.assertEqual(sparse_sor_solver.stopping_reason,
-                     sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
+                     sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
 
   def testSparseSorSolver_PositiveDefiniteRelaxationHigh(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        self.positive_definite_symmetric, self.vector_b, 25, 10**-20, 1.5, True)
+        self.positive_definite_symmetric, self.vector_b, 250, 10**-20, 1.5)
     print(sparse_sor_solver)
     self.assertEqual(sparse_sor_solver.stopping_reason,
-                     sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
+                     sor_pb2.SorReturnValue.RESIDUAL_CONVERGENCE)
 
   def testSparseSorSolver_PositiveDefiniteRelaxationVeryHigh(self):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        self.positive_definite_symmetric, self.vector_b, 25, 10**-20, 1.9, True)
+        self.positive_definite_symmetric, self.vector_b, 250, 10**-20, 1.9)
     print(sparse_sor_solver)
     self.assertEqual(sparse_sor_solver.stopping_reason,
                      sor_pb2.SorReturnValue.MAX_ITERATIONS_REACHED)
-
 
   def testSparseSorSolver_DivergenceExampleHighRelaxationRate(self):
     vector_b = vector.Vector(name="b", number_list=[-1, 7, -7])
@@ -123,6 +121,7 @@ class SparseSorSolverTest(unittest.TestCase):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_a, vector_b, 10, .0001, 1.0)
     solution_proto = sparse_sor_solver.to_proto()
+    self.assertEqual(type(solution_proto), sor_pb2.SorReturnValue)
 
   def testIllConditionedHigh(self):
     matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
@@ -133,7 +132,7 @@ class SparseSorSolverTest(unittest.TestCase):
 
     sparse_sor_solver = sparse_sor.SparseSorSolver(
             matrix_ill_conditioned, vector_ill_conditioned,
-            50, 10**-20, 1.5, True)
+            50, 10**-20, 1.5)
 
     print(sparse_sor_solver)
 
