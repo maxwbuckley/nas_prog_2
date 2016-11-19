@@ -78,8 +78,9 @@ def effect_relaxation_rate(
   results = []
   while(i < 2.1):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, 50, 10**-10, i)
+        matrix, vector, 50, 2**-20, i)
     results.append(sparse_sor_solver.iteration)
+    print(sparse_sor_solver.stopping_reason)
     i += 0.1
   return(results)
 
@@ -165,7 +166,47 @@ print(sparse_sor_solver)
 
 sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_poor_conditioned, vector_poor_conditioned,
-        500, 10**-20, 1.2)
+        500, 10**-20, 1.9)
+        
+print(sparse_sor_solver)
+        
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_poor_conditioned, vector_poor_conditioned,
+        500, 10**-20, 2.0)
+        
+print(sparse_sor_solver)
+
+print("----------------------------------------")
+print("Show effect of ill conditioned matrix")
+print("----------------------------------------")
+
+matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
+      [[1, 0.99],
+       [0.99, 0.98]])
+       
+vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        500, 10**-20, 1.0)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        500, 10**-20, 1.1)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        500, 10**-20, 1.9)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        500, 10**-20, 2.0)
         
 print(sparse_sor_solver)
 
