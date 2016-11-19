@@ -8,29 +8,28 @@ import sparse_sor
 import pandas
 from proto_genfiles.protos import sor_pb2
 import random
+from matplotlib import pyplot
 
 
+# Create a number of matrices and vectors to experiment with
 
 positive_definite_symmetric = sparse_matrix.SparseMatrix(dense_matrix=
   [[2, -1, 0],
   [-1, 2, -1],
   [0, -1, 2]])
 
-vector_b_3 = vector.Vector(name = "b", number_list = [1, 1, 1])
+vector_b_1 = vector.Vector(name = "b", number_list = [1, 1, 1])
 
-
-
-# Create a number of matrices and vectors to experiment with
-matrix_a = sparse_matrix.SparseMatrix(dense_matrix=
+diag_dominant_a = sparse_matrix.SparseMatrix(dense_matrix=
       [[7, 1, 0, 3, 0],
        [0, -7, 1, 0, 0],
        [1, 0, 8, 2, 0],
        [1, 0, 0, 7, 2],
        [-1, 0, -1, 0, 9]])
 
-vector_b = vector.Vector(name = "b", number_list = [1, 1, 2, 2, 3])
+vector_b_2 = vector.Vector(name = "b", number_list = [1, 1, 2, 2, 3])
 
-matrix_b = sparse_matrix.SparseMatrix(dense_matrix=
+diag_dominant_b = sparse_matrix.SparseMatrix(dense_matrix=
       [[15, 1, 0, 0, 0, 4, 0, 0, 1, 0],
        [0, -14, 1, 0, 0, 3, 0, 0, 1, 2],
        [1, 0, 21, 0, 1, 0, 3, 2, 0, 0],
@@ -42,10 +41,10 @@ matrix_b = sparse_matrix.SparseMatrix(dense_matrix=
        [1, 0, 0, 2, 3, 0, 0, 2, 19, 0],
        [-1, 0, 0, 0, -9, 0, 5, 2, 0, 29]])
 
-vector_d = vector.Vector(name = "d",
+vector_b_3 = vector.Vector(name = "d",
                          number_list = [3, 4, 3, 2, 3, 1, 5, 3, 1, 2])
 
-matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
+diag_dominant_c = sparse_matrix.SparseMatrix(dense_matrix=
       [[15, 1, 0, 3, 0, 4, 0],
        [0, -14, 0, 0, 0, 3, 0],
        [1, 0, 21, 0, 1, 0, 3],
@@ -54,16 +53,19 @@ matrix_c = sparse_matrix.SparseMatrix(dense_matrix=
        [0, 1, 0, 3, 0, -14, 4],
        [0, 0, 1, 0, 0, 3, 23]])
 
-vector_f = vector.Vector(name = "f",
+vector_b_4 = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
 # Create list of relaxation rates to act as indices
-index_list = [ x / 10 for x in range(10,21)]
-index_list = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+index_list = [ x / 10 for x in range(1,21)]
 
-def experiment_EffectOfDifferentRelaxationRate(
-    matrix, vector, maxits):
-  """Calculate residual sum for a matrix with different relaxation rates.
+print("-----------------------------------------")
+print("Show effect of different relaxation rates")
+print("-----------------------------------------")
+
+def effect_relaxation_rate(
+    matrix, vector):
+  """Calculate stopping iterationa matrix with different relaxation rates.
 
   Args:
     matrix: A sparse_matrix.Matrix. This needs to be diagonally dominant.
@@ -72,79 +74,57 @@ def experiment_EffectOfDifferentRelaxationRate(
 
   Returns: List of sum of residuals for different relaxation rates.
   """
-  i = 1.0
+  i = 0.1
   results = []
   while(i < 2.1):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, maxits, 2**-10, i)
-    results.append(sparse_sor_solver.iteration
-            )
+        matrix, vector, 50, 2**-20, i)
+    results.append(sparse_sor_solver.iteration)
+    print(sparse_sor_solver.stopping_reason)
     i += 0.1
   return(results)
 
-positive_def = experiment_EffectOfDifferentRelaxationRate(
-  positive_definite_symmetric, vector_b_3, 50)
+positive_def = effect_relaxation_rate(positive_definite_symmetric, vector_b_1)
+diag_a = effect_relaxation_rate(diag_dominant_a, vector_b_2)
+diag_b = effect_relaxation_rate(diag_dominant_b, vector_b_3)
+diag_c = effect_relaxation_rate(diag_dominant_c, vector_b_4)
 
-matrices = [matrix_a, matrix_b, matrix_c]
-vectors = [vector_a, vector_b, vector_c]
-maxits = [5, 10]
-results = { (matrix_name, vector_name, maxits) : result }
-experiment_a = experiment_EffectOfDifferentRelaxationRate(matrix_a,
-                                                          vector_b, 10)
-experiment_b = experiment_EffectOfDifferentRelaxationRate(matrix_b,
-                                                          vector_d, 10)
-experiment_c = experiment_EffectOfDifferentRelaxationRate(matrix_c,
-                                                          vector_f, 10)
-experiment_d = experiment_EffectOfDifferentRelaxationRate(matrix_a,
-                                                          vector_b, 5)
-experiment_e = experiment_EffectOfDifferentRelaxationRate(matrix_b,
-                                                          vector_d, 5)
-experiment_f = experiment_EffectOfDifferentRelaxationRate(matrix_c,
-                                                          vector_f, 5)
-experiment_g = experiment_EffectOfDifferentRelaxationRate(matrix_a,
-                                                          vector_b, 20)
-experiment_h = experiment_EffectOfDifferentRelaxationRate(matrix_b,
-                                                          vector_d, 20)
-experiment_i = experiment_EffectOfDifferentRelaxationRate(matrix_c,
-                                                          vector_f, 20)
+table = pandas.DataFrame({'relaxation_rate':index_list,
+                           'positive_def': positive_def, 'diag_a': diag_a,
+                           'diag_b':diag_b, 'diag_c':diag_c}).set_index(
+                           'relaxation_rate')
 
-# TODO (rob) Look here at positive def results.
-table1 = pandas.DataFrame({
-                           'matrix_a': positive_def
-                           })
-"""
-table1 = pandas.DataFrame({'relaxation_rate':index_list,
-                           'matrix_a': positive_def,'matrix_b':experiment_b,
-                           'matrix_c':experiment_c})
-table2 = pandas.DataFrame({'relaxation_rate':index_list,
-                           'matrix_a':experiment_d,'matrix_b':experiment_e,
-                           'matrix_c':experiment_f}).set_index('relaxation_rate')
+print(table)
+                           
+pyplot.plot(table)
+pyplot.ylabel('Number of Iterations Run')
+pyplot.xlabel('Relaxation Rate')
+pyplot.legend(["diag_c","diag_a","diag_b","positive_def"], loc=9,ncol=4)
+pyplot.show()
 
-table3 = pandas.DataFrame({'relaxation_rate':index_list,
-                           'matrix_a':experiment_g,'matrix_b':experiment_h,
-                           'matrix_c':experiment_i})
-
-#table1_with_index = table1.set_index('relaxation_rate')
-table3_with_index = table3.set_index('relaxation_rate')
-"""
 # Print results to be added to assignment doc
-print(table1)
-#print(table2)
-#print(table3_with_index)
+
+print("------------------------------------------------------------------")
+print("Show effect of setting relaxation rate set to out of bounds number")
+print("------------------------------------------------------------------")
 
 # Experiment to see effect of setting relaxation rate to out of bounds number
-sparse_sor_solver_a = sparse_sor.SparseSorSolver(
-        matrix_a, vector_b, 50, 10**-20, 20)
+sparse_sor_solver_a = sparse_sor.SparseSorSolver(positive_definite_symmetric,
+                                                 vector_b_1, 50, 10**-10, 20)
 
-sparse_sor_solver_b = sparse_sor.SparseSorSolver(
-        matrix_b, vector_d, 50, 10**-20, 20)
+sparse_sor_solver_b = sparse_sor.SparseSorSolver(diag_dominant_a,
+                                                 vector_b_2, 50, 10**-10, 20)
+
+sparse_sor_solver_c = sparse_sor.SparseSorSolver(diag_dominant_b, 
+                                                 vector_b_3, 50, 10**-10, 20)
         
-sparse_sor_solver_c = sparse_sor.SparseSorSolver(
-        matrix_c, vector_f, 50, 10**-20, 20)
+sparse_sor_solver_d = sparse_sor.SparseSorSolver(diag_dominant_c,
+                                                 vector_b_4, 50, 10**-10, 20)
 
 print(sparse_sor_solver_a)
 print(sparse_sor_solver_b)
 print(sparse_sor_solver_c)
+print(sparse_sor_solver_d)
 
 """ Black-Scholes with Google stock options """
 
@@ -160,33 +140,81 @@ strike_price = 730
 
 k = 1/365
 
-# Experiment to see effect of ill-conditioned matrix on sparse_sor
+# Experiment to see effect of poorly-conditioned matrix on sparse_sor
 
-matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
+print("----------------------------------------")
+print("Show effect of poorly conditioned matrix")
+print("----------------------------------------")
+
+matrix_poor_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
       [[1.01, 1],
        [1, 1.01]])
+       
+vector_poor_conditioned = vector.Vector(name = "b", number_list = [2, 2])
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_poor_conditioned, vector_poor_conditioned,
+        500, 10**-20, 1.0)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_poor_conditioned, vector_poor_conditioned,
+        500, 10**-20, 1.1)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_poor_conditioned, vector_poor_conditioned,
+        500, 10**-20, 1.9)
+        
+print(sparse_sor_solver)
+        
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_poor_conditioned, vector_poor_conditioned,
+        500, 10**-20, 2.0)
+        
+print(sparse_sor_solver)
+
+print("----------------------------------------")
+print("Show effect of ill conditioned matrix")
+print("----------------------------------------")
+
+matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
+      [[1, 0.99],
+       [0.99, 0.98]])
        
 vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
 
 sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_ill_conditioned, vector_ill_conditioned,
-        50, 10**-20, 1.0)
+        500, 10**-20, 1.0)
         
 print(sparse_sor_solver)
 
 sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_ill_conditioned, vector_ill_conditioned,
-        50, 10**-20, 1.1)
+        500, 10**-20, 1.1)
         
 print(sparse_sor_solver)
 
 sparse_sor_solver = sparse_sor.SparseSorSolver(
         matrix_ill_conditioned, vector_ill_conditioned,
-        50, 10**-20, 1.2)
+        500, 10**-20, 1.9)
+        
+print(sparse_sor_solver)
+
+sparse_sor_solver = sparse_sor.SparseSorSolver(
+        matrix_ill_conditioned, vector_ill_conditioned,
+        500, 10**-20, 2.0)
         
 print(sparse_sor_solver)
 
 # Experiment to see effect of different levels of tolerance
+
+print("--------------------------------------------")
+print("Show effect of different levels of tolerance")
+print("--------------------------------------------")
 
 def experiment_EffectOfDifferentTolerance(matrix, vector):
   """Calculate residual sum for a matrix with different relaxation rates.
@@ -203,13 +231,16 @@ def experiment_EffectOfDifferentTolerance(matrix, vector):
         matrix, vector, 50, 10**i, 1.0)
     print(sparse_sor_solver)
     i -= 4
-    
-experiment_EffectOfDifferentTolerance(matrix_a, vector_b)
-experiment_EffectOfDifferentTolerance(matrix_b, vector_d)
-experiment_EffectOfDifferentTolerance(matrix_c, vector_f)
+   
+experiment_EffectOfDifferentTolerance(positive_definite_symmetric, vector_b_1)
+experiment_EffectOfDifferentTolerance(diag_dominant_a, vector_b_2)
+experiment_EffectOfDifferentTolerance(diag_dominant_b, vector_b_3)
+experiment_EffectOfDifferentTolerance(diag_dominant_c, vector_b_4)
 
 # Experiment to see effect of very large matrix
-
+print("--------------------------------------------------------------------")
+print("Experiment with large, randomly generated diagonally dominant matrix")
+print("--------------------------------------------------------------------")
 # Create tridiagonal matrix
 matrix_a_proto = sor_pb2.SparseMatrix(
     matrix_name="a", row_count=5000, column_count=5000)
