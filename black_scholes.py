@@ -5,6 +5,9 @@ import math
 import sparse_matrix
 import vector
 import sparse_sor
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 # These values can be adjusted as required.
 
@@ -150,14 +153,25 @@ def run_black_scholes(
   stock_price_array = generate_stock_price_array(stock_price_max, h)
   option_price_grid = generate_option_price_grid(
       timesteps, strike_price, h, k, sigma, r, stock_price_array)
-  return {stock_price: option_price for stock_price, option_price in
-          zip(stock_price_array, option_price_grid[-1])}
+  return option_price_grid
 
 
 
 if __name__ == "__main__":
-  values = run_black_scholes(
+  option_price_grid = run_black_scholes(
       time_to_exercise,
       timesteps_total, strike_price, h, k, sigma, r, stock_price_max)
-  for key, value in sorted(values.items()):
-    print("Stock price: %s, Option price: %s" % (key, value))
+
+  stock_price_array = generate_stock_price_array(stock_price_max, h)
+  values = {stock_price: option_price for stock_price, option_price in
+            zip(stock_price_array, option_price_grid[-1])}
+  #for key, value in sorted(values.items()):
+  #  print("Stock price: %s, Option price: %s" % (key, value))
+  print(len(option_price_grid))
+  print(len(option_price_grid[-1]))
+  fig = plt.figure()
+  ax = fig.add_subplot(111, projection='3d')
+  ax.plot_wireframe(X=stock_price_array, Y=range(92), Z=option_price_grid,
+                    rstride=10, cstride=10)
+
+  plt.show()
