@@ -51,7 +51,7 @@ class SparseMatrix(object):
 
   def _convert_dense_matrix_to_tuple_list(self, dense_matrix):
     """Convert a dense matrix into a list of its non 0 valued tuples.
-    
+
     Args:
       dense_matrix: A list of lists with only numerical entries.
     Returns:
@@ -66,7 +66,7 @@ class SparseMatrix(object):
 
   def _convert_proto_to_tuple_list(self, sparse_value_proto):
     """Convert a proto into a list of its non 0 valued tuples.
-    
+
     Args:
       sparse_value_proto: sor_pb2.SparseMatrix proto.
     Returns:
@@ -79,7 +79,7 @@ class SparseMatrix(object):
 
   def _get_csr_structure(self, sparse_value_proto=None, dense_matrix=None):
     """Convert either a proto or a dense matrix into csr format
-    
+
     Args:
       sparse_value_proto: sor_pb2.SparseMatrix proto.
       dense_matrix: A list of lists with only numerical entries.
@@ -190,4 +190,26 @@ class SparseMatrix(object):
     if self.columns == vector_object.length:
       return True
     return False
+
+  def one_norm(self):
+    """Returns the matrix one norm. The maximum column sum."""
+    one_norm = 0
+    col_totals = {}
+    for i, col in enumerate(self.cols):
+      new_total = col_totals.get(col, 0) + abs(self.vals[i])
+      col_totals[col] = new_total
+      if new_total > one_norm:
+        one_norm = new_total
+    return one_norm
+
+  def infinity_norm(self):
+    """Returns the matrix infinity norm. The maximum row sum."""
+    infinity_norm = 0
+    for i in range(self.rows):
+      row_sum = 0
+      for j in range(self.rowStart[i], self.rowStart[i + 1]):
+        row_sum += abs(self.vals[j])
+      if row_sum > infinity_norm:
+        infinity_norm = row_sum
+    return infinity_norm
 

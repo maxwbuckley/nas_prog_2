@@ -61,7 +61,7 @@ class SparseMatrixTest(unittest.TestCase):
     self.assertEqual([1, 1], matrix_a.vals)
     self.assertEqual(expected, matrix_a.to_dense_matrix())
 
-  def testSparseMatrix_BigSquareMatrix(self):
+  def testsparsematrix_bigsquarematrix(self):
     expected = [[9.1, 0, 0, 0, 1],
                 [0, 0, 1, 0, 0],
                 [0, 0, 5, 0, 0],
@@ -150,6 +150,22 @@ class SparseMatrixTest(unittest.TestCase):
     vector_b = vector.Vector(number_list=[1, 2, 3, 4])
     self.assertEqual([11, 15, 19], matrix_a.multiply_by_vector(vector_b))
 
+  def testSparseMatrixOneNorm(self):
+    square_mat = [[8, 1, -1],
+                  [2, 9, -3],
+                  [1, -8, 10]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=square_mat)
+    self.assertEqual(18, matrix_a.one_norm())
+
+  def testSparseMatrix_InfNorm(self):
+    expected = [[9.1, 0, 0, 0, 1],
+                [0, 0, 1, 0, 0],
+                [0, 0, 5, 0, 0],
+                [0, 0, 1, 0, 0],
+                [6, 1, 1, 1, 1]]
+    matrix_a = sparse_matrix.SparseMatrix(dense_matrix=expected)
+
+    self.assertEqual(10.1, matrix_a.infinity_norm())
 
 if __name__ == '__main__':
   unittest.main()
