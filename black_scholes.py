@@ -13,12 +13,12 @@ from mpl_toolkits.mplot3d import Axes3D
 # These values can be adjusted as required.
 
 r = 0.00234 # Risk free rate of return per day.
-sigma = .121294600283 # Daily standard deviation.
+sigma = .223 # Daily standard deviation.
 stock_price_max = 1000.0 # dollars, Float.
 h = 1000 # price sub intervals, Int.
 time_to_exercise = 30 # days to excise Int.
 timesteps_total = 120 # m the number of time_intervals to split t into Int.
-strike_price = 852.5 # Price at which we can sell our asset at time 0.
+strike_price = 720 # Price at which we can sell our asset at time 0.
 
 # scalar for converting rates to relevant time period of days.
 k = (time_to_exercise / timesteps_total) / 365
@@ -158,7 +158,7 @@ def run_black_scholes(
 
 def generate_3d_plot(
     time_to_exercise, timesteps_total, stock_price_array, option_price_grid,
-    exercise_price):
+    exercise_price, sigma):
   """Generate 3d plot of the computed data."""
   fig = plt.figure()
   ax = fig.add_subplot(111, projection='3d')
@@ -172,8 +172,8 @@ def generate_3d_plot(
   ax.set_xlabel('Stock Price ($)')
   ax.set_ylabel('Time to Exercise (days)')
   ax.set_zlabel('Option Price ($)')
-  plt.title('Black Scholes Option Price Surface for Strike Price X = $%s' %
-            strike_price, y=1.025)
+  plt.title('Black Scholes Option Price Surface for Strike Price X = $%s '
+            'Sigma = %s' %  (strike_price, sigma), y=1.025)
 
 
 
@@ -188,6 +188,6 @@ if __name__ == "__main__":
   values = {stock_price: option_price for stock_price, option_price in
             zip(stock_price_array, option_price_grid[-1])}
   for key, value in sorted(values.items()):
-    print("Strike price: %s, Option price: %s" % (key, value))
+    print("Stock price: %s, Option price: %s" % (key, value))
   generate_3d_plot(time_to_exercise, timesteps_total, stock_price_array,
-                   option_price_grid, strike_price)
+                   option_price_grid, strike_price, sigma)
