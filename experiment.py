@@ -93,7 +93,7 @@ table = pandas.DataFrame({'relaxation_rate':index_list,
                            'diag_b':diag_b, 'diag_c':diag_c}).set_index(
                            'relaxation_rate')
                            
-pyplot.plot(table)
+pyplot.plot(table[:1.65])
 pyplot.ylabel('Number of Iterations Run')
 pyplot.xlabel('Relaxation Rate')
 pyplot.legend(["diag_c","diag_a","diag_b","positive_def"], loc=9,ncol=4)
@@ -198,47 +198,3 @@ experiment_EffectOfDifferentTolerance(positive_definite_symmetric, vector_b_1)
 experiment_EffectOfDifferentTolerance(diag_dominant_a, vector_b_2)
 experiment_EffectOfDifferentTolerance(diag_dominant_b, vector_b_3)
 experiment_EffectOfDifferentTolerance(diag_dominant_c, vector_b_4)
-
-# Experiment to see effect of very large matrix
-print("--------------------------------------------------------------------")
-print("Experiment with large, randomly generated diagonally dominant matrix")
-print("--------------------------------------------------------------------")
-# Create tridiagonal matrix
-matrix_a_proto = sor_pb2.SparseMatrix(
-    matrix_name="a", row_count=5000, column_count=5000)
-for i in range(0, 5000):
-  value = matrix_a_proto.values.add()
-  value.row_index = i
-  value.column_index = i
-  value.value = random.randint(10,15)
-for i in range(1, 5000):
-  value = matrix_a_proto.values.add()
-  value.row_index = i
-  value.column_index = i-1
-  value.value = random.randint(2,4)
-for i in range(0, 4999):
-  value = matrix_a_proto.values.add()
-  value.row_index = i
-  value.column_index = i+1
-  value.value = random.randint(-4,4)
-  
-matrix_a = sparse_matrix.SparseMatrix(matrix_a_proto)
-
-# Create vector with 5000 entries
-vector_a_list = []
-for i in range(5000):
-  vector_a_list.append(random.randint(10,20))
-
-vector_b = vector.Vector(name = "a", number_list = vector_a_list)
-
-large_matrix_sor = effect_relaxation_rate(matrix_a, vector_b)
-
-table2 = pandas.DataFrame({'relaxation_rate':index_list,
-                           'large_matrix': large_matrix_sor}).set_index(
-                           'relaxation_rate')
-                           
-pyplot.plot(table2)
-pyplot.ylabel('Number of Iterations Run')
-pyplot.xlabel('Relaxation Rate')
-pyplot.legend(["large_matrix"], loc=9,ncol=4)
-pyplot.show()
