@@ -123,7 +123,20 @@ class SparseSorSolverTest(unittest.TestCase):
     solution_proto = sparse_sor_solver.to_proto()
     self.assertEqual(type(solution_proto), sor_pb2.SorReturnValue)
 
-  def testIllConditionedHigh(self):
+  def testIllConditionedNormalRelaxation(self):
+    matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
+          [[1.01, 1],
+           [1, 1.01]])
+
+    vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
+
+    sparse_sor_solver = sparse_sor.SparseSorSolver(
+            matrix_ill_conditioned, vector_ill_conditioned,
+            50, 10**-20, 1)
+
+    print(sparse_sor_solver)
+
+  def testIllConditionedHighRelaxation(self):
     matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
           [[1.01, 1],
            [1, 1.01]])

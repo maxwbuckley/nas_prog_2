@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 """This script is for running the black sholes algorithm for option pricing."""
 
+import numpy
 import math
 import sparse_matrix
 import vector
@@ -11,16 +12,16 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # These values can be adjusted as required.
 
-r = 0.02 # Risk free rate of return per day.
-sigma = .2 # Daily standard deviation.
-stock_price_max = 2.0 # dollars, Float.
-h = 200 # price sub intervals, Int.
-time_to_exercise = 60 # days to excise Int.
-timesteps_total = 90 # m the number of time_intervals to split t into Int.
-strike_price = 1.0 # Price at which we can sell our asset at time 0.
+r = 0.00234 # Risk free rate of return per day.
+sigma = .121294600283 # Daily standard deviation.
+stock_price_max = 1000.0 # dollars, Float.
+h = 1000 # price sub intervals, Int.
+time_to_exercise = 30 # days to excise Int.
+timesteps_total = 120 # m the number of time_intervals to split t into Int.
+strike_price = 852.5 # Price at which we can sell our asset at time 0.
 
 # scalar for converting rates to relevant time period of days.
-k = (time_to_exercise/timesteps_total)/365
+k = (time_to_exercise / timesteps_total) / 365
 
 def start_prices(strike_price, stock_prices_time_0):
   """This calculates the list of start prices of the option at time 0.
@@ -155,7 +156,28 @@ def run_black_scholes(
       timesteps, strike_price, h, k, sigma, r, stock_price_array)
   return option_price_grid
 
+def generate_3d_plot(
+    time_to_exercise, timesteps_total, stock_price_array, option_price_grid,
+    exercise_price):
+  """Generate 3d plot of the computed data."""
+  fig = plt.figure()
+  ax = fig.add_subplot(111, projection='3d')
+  # Need to include time t
+  x = numpy.array(stock_price_array)
+  y = numpy.arange(0, time_to_exercise + 0.1, time_to_exercise/timesteps_total)
+  X, Y = numpy.meshgrid(x, y)
+  z = numpy.array(option_price_grid)
+  ax.plot_surface(X=X, Y=Y, Z=z, rstride=10, cstride=10)
 
+  ax.set_xlabel('Stock Price ($)')
+  ax.set_ylabel('Time to Exercise (days)')
+  ax.set_zlabel('Option Price ($)')
+  plt.title('Black Scholes Option Price Surface for Strike Price X = $%s' %
+            strike_price, y=1.025)
+
+
+
+  plt.show()
 
 if __name__ == "__main__":
   option_price_grid = run_black_scholes(
@@ -165,13 +187,7 @@ if __name__ == "__main__":
   stock_price_array = generate_stock_price_array(stock_price_max, h)
   values = {stock_price: option_price for stock_price, option_price in
             zip(stock_price_array, option_price_grid[-1])}
-  #for key, value in sorted(values.items()):
-  #  print("Stock price: %s, Option price: %s" % (key, value))
-  print(len(option_price_grid))
-  print(len(option_price_grid[-1]))
-  fig = plt.figure()
-  ax = fig.add_subplot(111, projection='3d')
-  ax.plot_wireframe(X=stock_price_array, Y=range(92), Z=option_price_grid,
-                    rstride=10, cstride=10)
-
-  plt.show()
+  for key, value in sorted(values.items()):
+    print("Strike price: %s, Option price: %s" % (key, value))
+  generate_3d_plot(time_to_exercise, timesteps_total, stock_price_array,
+                   option_price_grid, strike_price)
