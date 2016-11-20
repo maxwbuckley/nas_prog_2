@@ -57,14 +57,14 @@ vector_b_4 = vector.Vector(name = "f",
                          number_list = [3, 4, 3, 5, 3, 1, 2])
 
 # Create list of relaxation rates to act as indices
-index_list = [ x / 10 for x in range(1,21)]
+index_list = [ x / 100 for x in range(10,201)]
 
 print("-----------------------------------------")
 print("Show effect of different relaxation rates")
 print("-----------------------------------------")
 
 def effect_relaxation_rate(
-    matrix, vector):
+    matrix, vector, maxits=50):
   """Calculate stopping iterationa matrix with different relaxation rates.
 
   Args:
@@ -76,12 +76,11 @@ def effect_relaxation_rate(
   """
   i = 0.1
   results = []
-  while(i < 2.1):
+  while(i < 2.01):
     sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix, vector, 50, 2**-20, i)
+        matrix, vector, maxits, 2**-20, i)
     results.append(sparse_sor_solver.iteration)
-    print(sparse_sor_solver.stopping_reason)
-    i += 0.1
+    i += 0.01
   return(results)
 
 positive_def = effect_relaxation_rate(positive_definite_symmetric, vector_b_1)
@@ -93,8 +92,6 @@ table = pandas.DataFrame({'relaxation_rate':index_list,
                            'positive_def': positive_def, 'diag_a': diag_a,
                            'diag_b':diag_b, 'diag_c':diag_c}).set_index(
                            'relaxation_rate')
-
-print(table)
                            
 pyplot.plot(table)
 pyplot.ylabel('Number of Iterations Run')
@@ -142,73 +139,38 @@ k = 1/365
 
 # Experiment to see effect of poorly-conditioned matrix on sparse_sor
 
-print("----------------------------------------")
-print("Show effect of poorly conditioned matrix")
-print("----------------------------------------")
+print("------------------------------------------------------------")
+print("Show effect of poorly-conditioned and ill-conditioned matrix")
+print("------------------------------------------------------------")
 
 matrix_poor_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
       [[1.01, 1],
        [1, 1.01]])
        
-vector_poor_conditioned = vector.Vector(name = "b", number_list = [2, 2])
-
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_poor_conditioned, vector_poor_conditioned,
-        500, 10**-20, 1.0)
-        
-print(sparse_sor_solver)
-
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_poor_conditioned, vector_poor_conditioned,
-        500, 10**-20, 1.1)
-        
-print(sparse_sor_solver)
-
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_poor_conditioned, vector_poor_conditioned,
-        500, 10**-20, 1.9)
-        
-print(sparse_sor_solver)
-        
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_poor_conditioned, vector_poor_conditioned,
-        500, 10**-20, 2.0)
-        
-print(sparse_sor_solver)
-
-print("----------------------------------------")
-print("Show effect of ill conditioned matrix")
-print("----------------------------------------")
-
 matrix_ill_conditioned = sparse_matrix.SparseMatrix(dense_matrix=
       [[1, 0.99],
        [0.99, 0.98]])
        
+vector_poor_conditioned = vector.Vector(name = "b", number_list = [2, 2])
+
 vector_ill_conditioned = vector.Vector(name = "b", number_list = [2, 2])
 
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_ill_conditioned, vector_ill_conditioned,
-        500, 10**-20, 1.0)
-        
-print(sparse_sor_solver)
+poor_condition = effect_relaxation_rate(matrix_poor_conditioned,
+                                        vector_poor_conditioned, maxits=500)
+                       
+ill_condition = effect_relaxation_rate(matrix_ill_conditioned,
+                                       vector_ill_conditioned, maxits=500)
 
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_ill_conditioned, vector_ill_conditioned,
-        500, 10**-20, 1.1)
-        
-print(sparse_sor_solver)
-
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_ill_conditioned, vector_ill_conditioned,
-        500, 10**-20, 1.9)
-        
-print(sparse_sor_solver)
-
-sparse_sor_solver = sparse_sor.SparseSorSolver(
-        matrix_ill_conditioned, vector_ill_conditioned,
-        500, 10**-20, 2.0)
-        
-print(sparse_sor_solver)
+table1 = pandas.DataFrame({'relaxation_rate':index_list,
+                           'poor_condition': poor_condition,
+                           'ill_condition': ill_condition}).set_index(
+                           'relaxation_rate')
+                           
+pyplot.plot(table1)
+pyplot.ylabel('Number of Iterations Run')
+pyplot.xlabel('Relaxation Rate')
+pyplot.legend(["ill_condition","poor_condition"], loc=9,ncol=4)
+pyplot.show()
 
 # Experiment to see effect of different levels of tolerance
 
@@ -267,9 +229,16 @@ vector_a_list = []
 for i in range(5000):
   vector_a_list.append(random.randint(10,20))
 
-vector_a = vector.Vector(name = "a", number_list = vector_a_list)
+vector_b = vector.Vector(name = "a", number_list = vector_a_list)
 
-large_matrix_sor = sparse_sor.SparseSorSolver(matrix_a, vector_a, 100, 
-                                              2**-20, 1.0)
-#\\print(large_matrix_sor)                                              
-print(large_matrix_sor.iteration, large_matrix_sor.stopping_reason)
+large_matrix_sor = effect_relaxation_rate(matrix_a, vector_b)
+
+table2 = pandas.DataFrame({'relaxation_rate':index_list,
+                           'large_matrix': large_matrix_sor}).set_index(
+                           'relaxation_rate')
+                           
+pyplot.plot(table2)
+pyplot.ylabel('Number of Iterations Run')
+pyplot.xlabel('Relaxation Rate')
+pyplot.legend(["large_matrix"], loc=9,ncol=4)
+pyplot.show()
